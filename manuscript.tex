@@ -169,7 +169,7 @@
 \begin{abstract}
 Inverted Indexes are widely adopted in the vast majority of information systems.
 Growing requirement for efficient query processing has motivated various compression techniques with different space-time characteristics.
-While a single encoder yields a relatively stable point in the space-time trade-off curve, flexibly transforming its characteristic along the curve to fit different IR tasks can be a better way to prepare the index.
+While a single encoder yields a relatively stable point in the space-time tradeoff curve, flexibly transforming its characteristic along the curve to fit different IR tasks can be a better way to prepare the index.
 Recent Research come out with an idea of combining different encoders within the same index, namely, exploiting access skewness by compressing frequently accessed regions with faster encoders and rarely accessed regions with succinct encoders.
 Thus improving the efficiency while minimizing the compressed size.
 
@@ -230,32 +230,41 @@ We perform an extensive experiment to show that our method, which is faster and 
 
 \keywords{Inverted Index; Bicriteria Compression; Lagrangian Relaxation}
 
-\section{Introduction}
-The \textit{proceedings} are the records of a conference.
-ACM seeks to give these conference by-products a uniform,
-high-quality appearance.  To do this, ACM has some rigid
-requirements for the format of the proceedings documents: there
-is a specified format (balanced  double columns), a specified
-set of fonts (Arial or Helvetica and Times Roman) in
-certain specified sizes (for instance, 9 point for body copy),
-a specified live area (18 $\times$ 23.5 cm [7" $\times$ 9.25"]) centered on
-the page, specified size of margins (1.9 cm [0.75"]) top, (2.54 cm [1"]) bottom
-and (1.9 cm [.75"]) left and right; specified column width
-(8.45 cm [3.33"]) and gutter size (.83 cm [.33"]).
+\section{Introduction}\label{sec:intro}
+Indexing is essential to efficiently manage growing data and perform quick queries in many information retrieval systems.
+The use of inverted Indexes in web search engine is probably one of the most successful examples in IR.
+Despite of the fact that it is a relatively old yet simple data structure, inverted index is extensible with supplementary information to answer different queries within much less space occupied.
+Compression has been one of the most active field of inverted index research in the last decades, for it not only reduces the space occupancy, but also accelerates data transfer in I/O.
+See \cite{catena2014inverted,trotman2014compression,zobel2006inverted} for a detailed survey.
 
-The good news is, with only a handful of manual
-settings\footnote{Two of these, the {\texttt{\char'134 numberofauthors}}
-and {\texttt{\char'134 alignauthor}} commands, you have
-already used; another, {\texttt{\char'134 balancecolumns}}, will
-be used in your very last run of \LaTeX\ to ensure
-balanced column heights on the last page.}, the \LaTeX\ document
-class file handles all of this for you.
+Traditional inverted index is composed of two parts: \textit{dictionary} and \textit{posting lists}.
+The former contains pointers mapping term to its corresponding posting list, while the latter contains the docid of the matching document, the frequency of occurrence in the document, and positional information (if to support phrasal and proximity matching).
+The inverted index compression  we are talking about is usually concentrated in the compression of posting lists.
 
-The remainder of this document is concerned with showing, in
-the context of an ``actual'' document, the \LaTeX\ commands
-specifically available for denoting the structure of a
-proceedings paper, rather than with giving rigorous descriptions
-or explanations of such commands.
+However, there exists a divergence between compressed size and decompression time,
+since pursuing the minimization of size will undoubtedly impair decoding.
+Encoders with different space-time treadoffs keep coming out to settle for requirements of various user scenarios \cite{lemire2015decoding,ottaviano2015optimal,ottaviano2014partitioned,petri2014score,silvestri2010vsencoding}.
+Among these techniques, splitting posting list into \textit{blocks} (or \textit{chunks}) has been demonstrate to be an efficient way and widely adopted by many encoders.
+For the reason that by keeping blocks separately accessible we can expect faster decoding speed and hierarchical structure.
+In addition, variable-sized blocks can utilize the clustering property of list to beat the entropy \cite{moffat2000binary,silvestri2010vsencoding}.
+Nonetheless, designers of information systems have to carefully choose one of these encoders to satisfy different IR tasks: whether to achieve optimal compression ratio/decoding speed, sacrificing the other one; or to balance them by adopting one proper encoder with finely tuned space-time tradeoff.
+
+Since a single encoder has its own stable performance in the space-time tradeoff curve, it would be natural to ask for an encoder, which can trade the space occupancy and decoding time flexibly, to fit in different system requirement and device context.
+An intuitive way to solve this problem is by combing different encoders into one index.
+Namely, compressing the frequently accessed parts using a faster but less space-efficient encoder, and other parts using a slower encoder that gives better compression.
+
+This idea is first adopted in \cite{yan2009inverted}.
+However, the procedure of choosing encoders works at a posting list granularity, which is too coarse to obtain a flexible space-time tradeoff.
+They also fail to explore complexity of the algorithm as it works on a empirical foundation.
+Giuseppe et al. \cite{ottaviano2015optimal} explicitly define the Space-Constrained Expected Time Minimization problem: given a dataset $ D $ and an upper bound $ \cal S $ on its compressed size, the goal is to choose one proper encoder from an encoder set $ \cal E $ for each block of the index.
+Thus minimizing the expected query processing time, provided that it can be compressed within $ \cal S $ space.
+
+{\color{red}{how giuseppe does and what's the difference}}
+
+Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
+Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
+Petri et al. \cite{petri2014score} describe an data structure combining pruned suffix tree and inverted index together to facilitate phrase-based ranking.
+
 
 \section{The {\secit Body} of The Paper}
 Typically, the body of a paper is organized
@@ -580,7 +589,7 @@ and the \textbf{.cls} and \textbf{.tex} files that it describes.
 % initial runs of your .tex file to
 % produce the bibliography for the citations in your paper.
 \bibliographystyle{abbrv}
-\bibliography{sigproc}  % sigproc.bib is the name of the Bibliography in this case
+\bibliography{sigproc,reference}  % sigproc.bib is the name of the Bibliography in this case
 % You must have a proper ".bib" file
 %  and remember to run:
 % latex bibtex latex latex
