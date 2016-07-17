@@ -258,8 +258,33 @@ However, the procedure of choosing encoders works at a posting list granularity,
 They also fail to explore complexity of the algorithm as it works on a empirical foundation.
 Giuseppe et al. \cite{ottaviano2015optimal} explicitly define the Space-Constrained Expected Time Minimization problem: given a dataset $ D $ and an upper bound $ \cal S $ on its compressed size, the goal is to choose one proper encoder from an encoder set $ \cal E $ for each block of the index.
 Thus minimizing the expected query processing time, provided that it can be compressed within $ \cal S $ space.
+They then propose a linear time solution for this problem, which is quite straight forward.
+Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non decreasing order by the time/space gain ratio of each advisable encoder on each block.
+After this, a sequential scan and replace is able to find all the optional solutions for any possible budget constraint $ \cal S $.
+Given the fact that each posting list is divided into fixed-sized blocks (say, 128 postings) and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
 
-{\color{red}{how giuseppe does and what's the difference}}
+By refining the granularity to block level and the carefully designed algorithm, they are able to find a solution with minimal query time.
+Also, the approximation is additive, which is at most a block size larger than $ \cal S $.
+However, the algorithm takes too much space to sort the compression options that it can be hardly fit into memory; second, since the sorting and sequential scan cannot be accelerated by parallel, the whole procedure is delay by them somehow; third, their solution is based on assumption that the posting lists are split into fixed-sized blocks, otherwise the compression options are hardly to sort and might take much more space. 
+
+We argue that global ordering of the compression options for all the blocks is not a good idea, since it will lead to the above three shortcomings.
+In this paper, we try to attack this problem from another perspective.
+The main contributions are listed below:
+\begin{enumerate}
+	\item We introduce the conception of \textit{Bicriteria Compression} problem \cite{farruggia2014bicriteria} to extend the Space-Constrained Expected Time Minimization problem, which contains another dual problem.
+	It changes the role of space/time by asking for the minimal compressed size, provided an upper bound $ T $ in its average query processing time or decompression time.
+	By solving the \textit{Bicriteria Compression} problem  we can expect our compression method to be more universal for different scenarios.
+	\item We reduce the problem into a Resource Constrained Shortest Path problem \cite{mehlhorn2000resource} over a weighted DAG $ \cal G $, however, edges in $ \cal G $ contain two penalties: space cost and time weight.
+	Thus, the problem can be formalized using Lagrangian relaxation, we use the algorithm introduced in \cite{farruggia2014bicriteria} and \cite{handler1980dual} to settle in $ O(n\log^{2}n) $ time and $ O(n) $ space, while keeping the same additive approximation guarantee.
+	\item Different from \cite{ottaviano2015optimal} which is a global search algorithm, our method amortizes the expect budget over each posting list.
+	Thus, all the phrases of compression can be processed in a parallel way, runtime space requirement is also reduced without storing options in an index level.
+	Our method is able to keep the additive approximation guarantee under different budgets, however, works much faster in practice.	
+	{\color{red} Use data to demonstrate it}.
+	\item we execute a preliminary set of experiments on two realistic dataset, GOV2 and Common Crawl, with AOL query log.
+	Analysis shows that our method is able to obtain flexible tradeoffs under bicriteria compression.
+	Its compressed size and query processing time is very competitive to the hybrid index in \cite{ottaviano2015optimal}, however, with more detailed description and more strict theoretic foundation.
+\end{enumerate}
+
 
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
 Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
