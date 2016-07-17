@@ -285,10 +285,44 @@ The main contributions are listed below:
 	Its compressed size and query processing time is very competitive to the hybrid index in \cite{ottaviano2015optimal}, however, with more detailed description and more strict theoretic foundation.
 \end{enumerate}
 
+\section{Preliminaries}\label{sec: preliminaries}
+\subsection{Index Structure and Compression}
+Given a collection of \textit{D} documents, an inverted index can be seen as a big table mapping each unique \textit{term} to a\textit{ posting list} which contains all the document identifiers (called \textit{docid}) and the number of occurrences in the document (called \textit{frequency}), and possibly other information like the positions of each occurrence within the documents.
+The set of terms is called \textit{lexicon}, which is relatively small compared to postings.
+To rank the documents in response to a query, the posting list for the terms of the query must be traversed.
+There is a vast variety of literature study on structures and query processing strategies, see \cite{ding2011faster,navarro2010dual} for a detailed survey.
 
+Different orderings of the postings in the posting list change both the algorithm for ranked retrieval and the underlying representation of the postings in the inverted index.
+Generally, there are two kinds of orderings, namely the docid-sorted and frequency-sorted, in docid-sorted index postings are sorted by docid in ascending order, allowing efficient compression and fast query processing; in frequency-sorted index postings are sorted by frequency in descending order and postings with same frequency are sorted by docid, an early termination can be reached for ranked query since the most promising postings are placed close to the start of the list.
+A fatal problem with frequency-sorted index is that unordered docids are hard to compress, commercial search engines reportedly use the former obtain very good results by \cite{dimopoulos2013optimizing}.
+The appropriate compression of docid-sorted index is the focus of our work.
+
+To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
+Hence, the task of index compression is best viewed code sequences of integers of the form $x_{1},x_{2},x_{3},\ldots,x_{n}$ where $x_{i}\geq0$ for all $1\leq i\leq n$, and $n\geq1$ is the length of the sequence (\cite{anh2010index}).
+
+Index compression is a relatively old and established topic in the literature of IR, researchers have summarized the previous work explicitly \cite{catena2014inverted,lemire2015decoding,silvestri2010vsencoding,trotman2014compression}.
+The variety of compression techniques can be roughly divided into two classes, namely the \textit{integer-oriented encoders} and the \textit{list-oriented encoders}.
+
+The integer-oriented encoders assign an unique codeword to each integer of the input list, then the compression procedure turns into a mapping or substitution from the integer space to code space.
+As they compress integers without considering their neighborings, the integer-oriented encoders are also called oblivious encoders\cite{catena2014inverted}, such as \textit{unary code, Elias Gamma/Delta codes \emph{and} Golomb/Rice codes}.
+Most integer-oriented encoders are hard to decode since they need bitwise operations to cross computer word boundaries, so byte/word-aligned encoders, are proposed to solve this problem, like \textit{Variable Byte} and \textit{Group Varint}, more importantly, they can be further improved by SIMD instructions of modern CPUs\cite{stepanov2011simd,trotman2014compression}.
+
+List-oriented encoders are designed to exploit the cluster of neighboring integers, each time a fixed-sized or variable-sized group of integers is binary packed with an uniform bit width, providing equivalent compression ratio and faster decoding speed, the technique used by these encoders is called \textit{frame-of-reference}(FOR), or \textit{binary packing}\cite{goldstein1998compressing}.
+Basically, their compression ratios are inferior to these of the first category as a batch of integers are encoded indiscriminately, and useless zeros are filled in the codeword to keep word-aligned.
+However, when decoded, list-oriented encoders can obtain an entire block while the formers just decode one integer at a time.
+More importantly, with the help of \textit{skip pointers} or \textit{skip list}, it is possible to step along the codewords compressed by list-oriented encoders and stop when the required number of blocks has been bypassed.
+Some of these encoders are \textit{Simple Family}, AFOR and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR).
+
+\subsection{Pareto-optimal Compression}
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
 Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
 Petri et al. \cite{petri2014score} describe an data structure combining pruned suffix tree and inverted index together to facilitate phrase-based ranking.
+Our work is similar to these efforts, applying bicriteria compression to inverted index.
+
+In our context, we are interested in optimally trading space occupancy with query processing time under specified space/time budget.
+With respect to the notion of ``optimal", we introduce the concept of \textit{Pareto-Optimal Compression} to define it in a principled way: encoders achieve different points in the space-time trade-off curve, if to set the space occupancy and query processing time as two dimensions of the coordinate system.
+Optimal ones are those extreme points whose performances are not worse than others in one dimension, and if to be optimized in any dimension, performances in the other two will get impaired accordingly.
+Absolutely there exists a set of Pareto-Optimal Compressions with different considerations.
 
 
 \section{The {\secit Body} of The Paper}
