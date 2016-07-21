@@ -46,6 +46,7 @@
 % For tracking purposes - this is V2.0 - May 2012
 
 \documentclass{sig-alternate-05-2015}
+\usepackage{amsmath,amssymb}
 \usepackage{multirow,booktabs,makecell}
 \usepackage{subfigure}
 \usepackage{color}
@@ -261,7 +262,7 @@ Thus minimizing the expected query processing time, provided that it can be comp
 They then propose a linear time solution for this problem, which is quite straight forward.
 Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non decreasing order by the time/space gain ratio of each advisable encoder on each block.
 After this, a sequential scan and replace is able to find all the optional solutions for any possible budget constraint $ \cal S $.
-Given the fact that each posting list is divided into fixed-sized blocks (say, 128 postings) and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
+Given the fact that each posting list is divided into fixed-sized blocks (say, 128 postings), whose total number is $ n $, and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
 
 By refining the granularity to block level and the carefully designed algorithm, they are able to find a solution with minimal query time.
 Also, the approximation is additive, which is at most a block size larger than $ \cal S $.
@@ -313,6 +314,8 @@ However, when decoded, list-oriented encoders can obtain an entire block while t
 More importantly, with the help of \textit{skip pointers} or \textit{skip list}, it is possible to step along the codewords compressed by list-oriented encoders and stop when the required number of blocks has been bypassed.
 Some of these encoders are \textit{Simple Family}, AFOR and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR).
 
+{\color{red}{we follow the settings used in \cite{ottaviano2015optimal}, that encoders in $ \cal E $ are chosen from list-oriented encoders and posting lists are uniformly split into fixed-size of 128.}}
+
 \subsection{Pareto-optimal Compression}
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
 Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
@@ -322,7 +325,112 @@ Our work is similar to these efforts, applying bicriteria compression to inverte
 In our context, we are interested in optimally trading space occupancy with query processing time under specified space/time budget.
 With respect to the notion of ``optimal", we introduce the concept of \textit{Pareto-Optimal Compression} to define it in a principled way: encoders achieve different points in the space-time trade-off curve, if to set the space occupancy and query processing time as two dimensions of the coordinate system.
 Optimal ones are those extreme points whose performances are not worse than others in one dimension, and if to be optimized in any dimension, performances in the other two will get impaired accordingly.
-Absolutely there exists a set of Pareto-Optimal Compressions with different considerations.
+Obviously there exists a set of Pareto-Optimal Compressions with different considerations.
+As an extreme example, consider the two solutions: one is space-optimal compressed by Binary Interpolative Coding \cite{moffat2000binary} and the other one is time-optimal compressed by SIMD encoders.
+That is, for any block of the posting list, we always choose to use either the space-efficient encoder or the time-efficient one.
+However, in between these two extremes, we still have a plethora of encoders like PFOR and Simple-X.
+Our goal is to move from one extreme to other by trading decompression speed for space occupancy, or vice versa.
+Since there are $ k $ encoders for $ n $blocks, the key is to automatically and efficiently choose any of them for optimal tradeoffs.
+
+\subsection{Directed Acyclic Graph}
+By modeling index compression as an Directed Acyclic Graph $ \cal G $, finding the optimal solution can be reduced to the \textit{Single Source Shortest Path} problem over it.
+
+$ \cal G $ is built as follows: a posting list can be treated as a list containing only positive integers $ L[0,m] $, where $ m $ is the number of postings.
+Then each integer is represented by a vertex, plus a dummy vertex marking the end of the sequence.
+$ \cal G $ is complete with $ O(m^2) $ edges, each edge is an exact correspondence of a partition in the $ L $.
+The weight of an edge in the $ \cal G $ is equal to the cost in bits consumed by the partition.
+The problem of fully partitioning $ L $ is converted to finding a path $\pi \in \Pi $ in $\mathcal{G}$, with its total edge weights $ \omega(\pi) $ minimized.
+
+It has been commonly used in many list-oriented encoders \cite{song2016optimizing}.
+These encoders usually partition a posting list into chunks of different lengths aligning to its local clusters.
+Earlier ones like Fixed Binary \cite{anh2004index} and AFOR \cite{delbru2010adaptive} use a simple greedy search without backtracking.
+Silvestri and Venturini introduce dynamic programming recurrence for VSEncoding \cite{silvestri2010vsencoding} while Guiseppe et al. resort to a more efficient approximation algorithm.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\linewidth]{sssp}
+	\caption[sssp]{Here is a DAG for sequence with 6 integers represented using gap(differences between them). Optional bit widths range from 3 to 5, each gap is fitted in the tuple (\textit{position, available-bit-width}), if the available-bit-widths are more than one, they are placed in different rows, the number in the edge denotes the cost for this path, the fixed cost is set to 4.}
+	\label{fig:sssp}
+\end{figure}
+
+However, our version of DAG $ \cal G $ has quite different definitions.
+The above methods are designed to pursue space-optimal partitioning at all costs, without considering the decompression speed.
+Our goal is to find one pareto-optimal solution under predefined space/time budget, in the new graph, each edge will have attached two weights: a \textit{time weight}, that accounts for the time to decompress a block, and a \textit{space cost}, that accounts for the number of bits needed to store a block associated to that edge.
+The most notable contrast in our $ \cal G $ lies in the blocks of constant-size, which determine edge have fixed start and end points.
+Between these points, there can be multiple edges to choose from due to the diversity of encoders.
+So the total number of edges are exactly $ k \cdot \lceil \dfrac{m}{128} \rceil  $ rather than $ O(m^2) $.
+For every path $ \pi $ from node 1 to node $ m $, we use $ s(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}x_{i,j}s_{i,j} $ to represent the whole compressed size, where $ l= \lceil \dfrac{m}{128} \rceil$, $ x_{i,j} $ represents the choice of the encoder for block $ i $, and is 1 if the chosen encoder is $ j $ and 0 otherwise, $ s_{i,j} $ denotes the space cost of block $ i $ using encoder $ \mathcal{E}_j $.
+Accordingly, the total decompression time is set to be $ t(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}t_{i,j} $.
+Thus we are able to rephrase the bicriteria compression problem into a Resource Constrained Shortest Path problem (RCSP) over the double weighted $ \cal G $, namely finding a path $ \pi $ whose decompression time $ s(\pi) < S $ while its compressed size $ t(\pi) $ minimized.
+Symmetrically, we can also exchange the role of space/time resources, which asks minimal $ s(\pi) $ with $ t(\pi) < T $.
+For the sake of convenience, we will consider the first formulation only in the rest of the paper. 
+
+%The common foundation for the abovementioned methods is to recast the integer sequence $\mathcal{S} \left[ 0,n \right]$ to a particular DAG $\mathcal{G}$, each integer is represented by a vertex, plus a dummy vertex marking the end of the sequence.
+%The graph $\mathcal{G}$ is complete, which means that for any $i$ and $j$ with $i < j \leqslant n$, there exists an edge connecting $v_{i}$ and $v_{j}$, denoted as $\left( v_{i}, v_{j} \right)$.
+%In fact, the edge is an exact correspondence of a partition in the sequence $\mathcal{S}\left[i,j \right] $, the problem of fully partitioning $\mathcal{S}$ is converted to finding a path $\pi$ in $\mathcal{G}$, for instance, $\pi=\left( v_{0}, v_{i_{1}} \right) \left( v_{i_{1}}, v_{i_{2}} \right)\ldots\left( v_{i_{k-1}}, v_{n} \right)$ with $k$ edges corresponds to the partition $\mathcal{S}\left[0,i_{1}-1 \right]\mathcal{S}\left[i_{1},i_{2}-1 \right] \ldots\mathcal{S}\left[i_{k-1},n-1\right] $ of $k$ blocks.
+%The weight of an edge in the graph is equal to the cost in bits consumed by the partition. Thus, the problem of optimally partitioning a sequence is reduced to the problem of Single-Source Shortest Path(SSSP) Labeling, as shown in Fig.~\ref{fig:sssp}.
+%An intuitive way to solve this is to firstly set the cost of each vertex in $\mathcal{G}$ to $+\infty$, then an iteration starts from the left vertex to the rightmost, when it comes to a vertex $v_{j}$ with $0\leqslant j < n$, a subproblem of find the optimal path from $v_{j}$ to $v_{n}$ shows up, assuming the optimal path from $v_{0}$ to $v_{j}$ has been correctly computed.
+%Each edge $\left( v_{j},v'\right)$ outgoing from $v_{j}$ will be assessed and cost of vertex $v'$ is updated if it becomes smaller. As can be seen, the time complexity of this algorithm is proportional to the number of edges in $\mathcal{G}$.
+
+\section{Modeling the Problem}
+%从这里想起来应该是把所有的posting list连接起来才对
+
+In order to formulate the bicriteria compression problem, we need firstly model the space occupancy and decompression time of each block.
+As stated in the Secion~\ref{sec: preliminaries}, we assume each posting list is split into blocks of fixed-size with a total number of $ n $, $ s_{i,j} $ is used to denote the compressed size of the \textit{i}th block encoded by the \textit{j}th encoder.
+It can be obtained by compressing blocks using all the encoders before processing.
+We follow \cite{ottaviano2015optimal} by setting $ T $ as the expected time to process queries from a given query set $ \cal Q $, and adopting the same model to predict the decompression time $ t_{i,j} $.
+Then $ T $ is closely related to query processing strategy used and the distribution in $ \cal Q $.
+We set $ t(\pi) = \sum_{i=1}^{n}x_{i,j}\hat{t}_{i,j} $, where $ \hat{t}_{i,j}=f_i t_{i,j} $, $ f_i $ is the number of times the \textit{i}th block was decoded while processing $ \cal Q $.
+Also, $ f_i $ can be set to 1 if to measure the thorough decompression time of the index.
+
+Now we can formulate our problem using Lagrangian relaxation into the famous RCSP as follows:
+
+\begin{align}
+ & \min_{\pi \in \Pi} t(\pi) \notag \\
+ \text{s.t.}\quad & s(\pi) \leqslant \cal S \label{eqn: RCSP}
+\end{align}
+
+By setting $ f(\pi) = t(\pi) $ and $ g(\pi) = s(\pi)- \mathcal{S} $, we may rewrite the formula~(\ref{eqn: RCSP}) as
+
+\begin{align*}
+& \min_{\pi \in \Pi} f(\pi)  \\
+\text{s.t.}\quad & g(\pi) \leqslant 0 \label{eqn: RCSP2}
+\end{align*}
+
+A brute-force solution to this problem would cost $ O(n^k) $ time and $ O(nk) $ space.
+By adopting a dynamic programming approach proposed in \cite{lawler2001combinatorial}, both time and space can be reduced to $ \Theta(n\mathcal{S}) $, which is $ O(m^{2}\log m) $ at its worst.
+Unfortunately this bound is still unacceptable is practice.
+
+To efficiently solve the problem we introduce the Lagrangian function to relax the constraint $ g(\pi) \leqslant 0 $:
+
+\begin{equation}
+L(\mu) = \min_{\pi \in \Pi} f(\pi)+\mu g(\pi)
+\end{equation}
+
+\noindent $ \mu $ is the Lagrangian multiplier following $ \mu \geq 0 $.
+It has been shown that this problem can be solved in linear time by solving this dual problem \cite{handler1980dual}.
+Let $ \pi^\circ $ be the path we find, and $ \pi^\star $ be the optimal path of the RCSP problem.
+At the end of Section~\ref{sec: our alg}, we will have proved the following theorem:
+\newtheorem{theorem}{Theorem}
+\begin{theorem}
+	$ \pi^\circ $ can be computed in $ O(\log^2 n) $ time and $ O(n) $ time with its space cost $ s(\pi^\circ) \leq f(\pi^\star) + s_{max} $ and time cost $ t(\pi^\circ) \leq T + 2t_{max} $.
+\end{theorem}
+
+\noindent Here we use $ s_{max} $ and $ t_{max} $ to denote the maximum space/time cost of one block.
+
+\section{Our approximation Algorithm}\label{sec: our alg}
+In this section we turn to the algorithm which solves the Lagrangian relaxation problem.
+Recall the algorithm in \cite{ottaviano2015optimal}, which first sorts all the possible encodings of each block across the whole index, then adopts a greedy search to scan the sorted list and replace a space-optimal solution with faster encodings until the time budget $ T $ is reached, thus meeting with its additive guarantee.
+Our algorithm works in a quite different way, its procedure can also be divided into two phase.
+In the first phase, we adopt the cutting-plane algorithm to solve the Lagrangian dual problem introduced in \cite{handler1980dual}.
+This algorithm starts from two extreme paths (say, $ \pi(0) $ and $ \pi(\infty) $) and fuses them to get a new path $ \pi' $, then recursively fuses $ \pi' $ with one of the former path until
+a maximal value of $ L(\mu) $ is reached.
+Also, a pair of paths $ \pi_L,\pi_R $
+
+
+Recall the definition of \textit{Dominance criterion} in \cite{ottaviano2015optimal},
+
+Our key observation is that each iteration can be implemented by finding the largest $ \lambda_{i,j} $ that approximates $ \mu $ from below.
 
 
 \section{The {\secit Body} of The Paper}
@@ -372,7 +480,7 @@ You can use whatever symbols, accented characters, or
 non-English characters you need anywhere in your document;
 you can find a complete list of what is
 available in the \textit{\LaTeX\
-User's Guide}\cite{Lamport:LaTeX}.
+User's Guide}.
 
 \subsection{Math Equations}
 You may want to display math equations in three distinct styles:
@@ -387,7 +495,7 @@ invoked with the usual \texttt{{\char'134}begin. . .{\char'134}end}
 construction or with the short form \texttt{\$. . .\$}. You
 can use any of the symbols and structures,
 from $\alpha$ to $\omega$, available in
-\LaTeX\cite{Lamport:LaTeX}; this section will simply show a
+\LaTeX; this section will simply show a
 few examples of in-text equations in context. Notice how
 this equation: \begin{math}\lim_{n\rightarrow \infty}x=0\end{math},
 set here in in-line math style, looks slightly different when
@@ -413,16 +521,15 @@ and follow it with another numbered equation:
 just to demonstrate \LaTeX's able handling of numbering.
 
 \subsection{Citations}
-Citations to articles \cite{bowman:reasoning,
-clark:pct, braams:babel, herlihy:methodology},
-conference proceedings \cite{clark:pct} or
-books \cite{salas:calculus, Lamport:LaTeX} listed
+Citations to articles,
+conference proceedings or
+books listed
 in the Bibliography section of your
 article will occur throughout the text of your article.
 You should use BibTeX to automatically produce this bibliography;
 you simply need to insert one of several citation commands with
 a key of the item cited in the proper location in
-the \texttt{.tex} file \cite{Lamport:LaTeX}.
+the \texttt{.tex} file .
 The key is a short reference you invent to uniquely
 identify each work; in this sample document, the key is
 the first author's surname and a
@@ -433,7 +540,7 @@ The details of the construction of the \texttt{.bib} file
 are beyond the scope of this sample document, but more
 information can be found in the \textit{Author's Guide},
 and exhaustive details in the \textit{\LaTeX\ User's
-Guide}\cite{Lamport:LaTeX}.
+Guide}.
 
 This article shows only the plainest form
 of the citation command, using \texttt{{\char'134}cite}.
@@ -557,7 +664,7 @@ to compare the two in the output of this sample document:
 
 This uses the \textbf{theorem} environment, created by
 the\linebreak\texttt{{\char'134}newtheorem} command:
-\newtheorem{theorem}{Theorem}
+%\newtheorem{theorem}{Theorem}
 \begin{theorem}
 Let $f$ be continuous on $[a,b]$.  If $G$ is
 an antiderivative for $f$ on $[a,b]$, then
@@ -605,7 +712,7 @@ two different creation commands are in the
 detailed instructions.  If you need to use another construct,
 not listed therein, which you want to have the same
 formatting as the Theorem
-or the Definition\cite{salas:calculus} shown above,
+or the Definition shown above,
 use the \texttt{{\char'134}newtheorem} or the
 \texttt{{\char'134}newdef} command,
 respectively, to create it.
@@ -648,7 +755,7 @@ and the \textbf{.cls} and \textbf{.tex} files that it describes.
 % initial runs of your .tex file to
 % produce the bibliography for the citations in your paper.
 \bibliographystyle{abbrv}
-\bibliography{sigproc,reference}  % sigproc.bib is the name of the Bibliography in this case
+\bibliography{reference}  % sigproc.bib is the name of the Bibliography in this case
 % You must have a proper ".bib" file
 %  and remember to run:
 % latex bibtex latex latex
