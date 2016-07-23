@@ -299,7 +299,7 @@ A fatal problem with frequency-sorted index is that unordered docids are hard to
 The appropriate compression of docid-sorted index is the focus of our work.
 
 To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
-Hence, the task of index compression is best viewed code sequences of integers of the form $x_{1},x_{2},x_{3},\ldots,x_{n}$ where $x_{i}\geq0$ for all $1\leq i\leq n$, and $n\geq1$ is the length of the sequence (\cite{anh2010index}).
+Hence, the task of index compression is best viewed code sequences of integers of the form $x_{1},x_{2},x_{3},\ldots,x_{n}$ where $x_{i}\geqslant0$ for all $1\leqslant i\leqslant n$, and $n\geqslant1$ is the length of the sequence (\cite{anh2010index}).
 
 Index compression is a relatively old and established topic in the literature of IR, researchers have summarized the previous work explicitly \cite{catena2014inverted,lemire2015decoding,silvestri2010vsencoding,trotman2014compression}.
 The variety of compression techniques can be roughly divided into two classes, namely the \textit{integer-oriented encoders} and the \textit{list-oriented encoders}.
@@ -387,14 +387,14 @@ Now we can formulate our problem using Lagrangian relaxation into the famous RCS
 
 \begin{align}
  & \min_{\pi \in \Pi} t(\pi) \notag \\
- \text{s.t.}\quad & s(\pi) \leqslant \cal S \label{eqn: RCSP}
+ \text{s.t.}\quad & s(\pi) \leqslant \cal S \label{equ: RCSP}
 \end{align}
 
-By setting $ f(\pi) = t(\pi) $ and $ g(\pi) = s(\pi)- \mathcal{S} $, we may rewrite the formula~(\ref{eqn: RCSP}) as
+By setting $ f(\pi) = t(\pi) $ and $ g(\pi) = s(\pi)- \mathcal{S} $, we may rewrite the Equation~\eqref{equ: RCSP} as
 
 \begin{align*}
 & \min_{\pi \in \Pi} f(\pi)  \\
-\text{s.t.}\quad & g(\pi) \leqslant 0 \label{eqn: RCSP2}
+\text{s.t.}\quad & g(\pi) \leqslant 0
 \end{align*}
 
 A brute-force solution to this problem would cost $ O(n^k) $ time and $ O(nk) $ space.
@@ -403,35 +403,85 @@ Unfortunately this bound is still unacceptable is practice.
 
 To efficiently solve the problem we introduce the Lagrangian function to relax the constraint $ g(\pi) \leqslant 0 $:
 
-\begin{equation}
-L(\mu) = \min_{\pi \in \Pi} f(\pi)+\mu g(\pi)
-\end{equation}
+\begin{align}
+L(\mu,\pi) = f(\pi)+\mu g(\pi) \label{equ: L(u,pi)} \\ 
+\intertext{and let}
+L(\mu) = \min_{\pi \in \Pi} L(\mu,\pi) \label{equ: L(u)}
+\end{align}
 
-\noindent $ \mu $ is the Lagrangian multiplier following $ \mu \geq 0 $.
+\noindent $ \mu $ is the Lagrangian multiplier following $ \mu \geqslant 0 $.
 It has been shown that this problem can be solved in linear time by solving this dual problem \cite{handler1980dual}.
-Let $ \pi^\circ $ be the path we find, and $ \pi^\star $ be the optimal path of the RCSP problem.
+Let $ \pi $ be the path we find, and $ \pi^\star $ be the optimal path of the RCSP problem.
 At the end of Section~\ref{sec: our alg}, we will have proved the following theorem:
 \newtheorem{theorem}{Theorem}
 \begin{theorem}
-	$ \pi^\circ $ can be computed in $ O(\log^2 n) $ time and $ O(n) $ time with its space cost $ s(\pi^\circ) \leq f(\pi^\star) + s_{max} $ and time cost $ t(\pi^\circ) \leq T + 2t_{max} $.
+	$ \pi $ can be computed in $ O(\log^2 n) $ time and $ O(n) $ time with its time cost $ t(\pi) \leqslant f(\pi^\star) + t_{max} $ and space cost $ s(\pi) \leqslant T + 2s_{max} $.
 \end{theorem}
 
 \noindent Here we use $ s_{max} $ and $ t_{max} $ to denote the maximum space/time cost of one block.
 
 \section{Our approximation Algorithm}\label{sec: our alg}
 In this section we turn to the algorithm which solves the Lagrangian relaxation problem.
-Recall the algorithm in \cite{ottaviano2015optimal}, which first sorts all the possible encodings of each block across the whole index, then adopts a greedy search to scan the sorted list and replace a space-optimal solution with faster encodings until the time budget $ T $ is reached, thus meeting with its additive guarantee.
+Recall the algorithm in \cite{ottaviano2015optimal}, which first sorts all the possible encodings of each block across the whole index, then adopts a greedy search to scan the sorted list and replace a space-optimal solution with faster encodings until the space budget $ S $ is reached, thus meeting with its additive guarantee.
+
 Our algorithm works in a quite different way, its procedure can also be divided into two phase.
 In the first phase, we adopt the cutting-plane algorithm to solve the Lagrangian dual problem introduced in \cite{handler1980dual}.
 This algorithm starts from two extreme paths (say, $ \pi(0) $ and $ \pi(\infty) $) and fuses them to get a new path $ \pi' $, then recursively fuses $ \pi' $ with one of the former path until
-a maximal value of $ L(\mu) $ is reached.
-Also, a pair of paths $ \pi_L,\pi_R $
+a lower bound of $ L(\mu,\pi) $ is reached.
+Thus we get an instantiation of $ \mu^\star $ corresponding to the maximal value of $ L(\mu) $, and a pair of paths $ (\pi_l,\pi_r) $ which are optimal for $ L(\mu^\star) $ and such that $ g(\pi_l) \geqslant 0 $ and $ g(\pi_r) \leqslant 0 $.
+
+In case one of the two path has its space cost $ s(\pi_r) = S $, then its time cost is the optimal one of $ t(\pi^\star) $.
+Unfortunately, this rarely occurs in practice and in most cases we have to tackle duality gap between $ \pi_l $ and $ \pi_r $.
+In the second phase, we will execute a sequential exchange of edges from both paths.
+After that, we will be able to get an optimal path whose time and space costs better approximate the budget.
+
+\subsection{Solving the Dual Problem}
+This phase mainly contributes to the fusion of two extreme paths, one of which is space-optimal while the other one is time-optimal, thus making the fused path converges gradually to the given range through an finite iteration.
+The key step stays in generating the optimal path $ \pi' $ for $ \mu $ in each iteration.
+
+Notice that in Equation~\eqref{equ: L(u,pi)} we have $ \mu \geqslant 0 $ and $ g(\pi) \leqslant 0 $, thus $ L(\mu,\pi) $ representing $ f(\pi) $ adding a negative number.
+As we are trying to find a minimal $ f(\pi) $, we get the following equation:
+
+\begin{equation}
+L(\mu) \leqslant f(\pi^\star)
+\end{equation}
+
+\noindent for every $ \mu \geqslant 0 $.
+Therefore, an best lower bound for the optimal path in RCSP can be found by solving its dual problem defined as 
+
+\begin{equation}
+L^\star = L(\mu^\star) = \max_{\mu \geqslant 0} L(\mu) =\max_{\mu \geqslant 0} \min_{\pi \in \Pi} f(\pi) + \mu g(\pi)
+\end{equation}
+
+\noindent Now the problem has been converted from searching for an optimal path to a linear programming calculating maximal $ L(\mu) $, where each path defines a feasible region.
+And our goal is find out the vertex which maximize $ L(\mu) $ from the convex hull defined by the intersection of paths.
+
+However, it is impossible to figure out the convex hull using traditional simplex method since there can be $ O(n^k) $ paths.
+Actually we only need a small part of them to heuristically pruning out unfeasible paths and determining the maximal $ L(\mu) $.
+
+The procedure can be best explained geometrically.
+Each path in $ \Pi $ may be associated in $ (\mu, L)（$ space with a line of the form $ L = f(\pi) + \mu g(\pi) $, where $ f(\pi) $ is the intercept along the L-axis and $ g(\pi) $ is the slope of the line.
+Feasible paths have a non-positive slope (sice $ g(\pi) \leqslant 0 $) and feasible paths have a positive slope.
+As mentioned above, we only keep a pair of paths in hand and recursively intersect them to determine the point $ (\mu',L') $.
+Note $ L(\mu) $ represents the lower envelope of the all the paths generated so far, so it will consist of two lower segments of the corresponding paths and the point of intersection will maximize $ L(\mu) $.
+If there exists another path $ L(\mu') $ ( generated using $ \mu' $) which further tightens the lower envelope $ L' $, then we can have the maximum value of $ L(\mu) $ more close to $ L^\star $ from above.
+So the whole procedure works to find a minimal maximum of $ L(\mu) $ since $ L(\mu') \geqslant L(\mu^\star) $.
+The iteration stops once $ L(\mu') $ cannot be reduced or we find a path $ \pi^\circ \in \Pi $ with $ g(\pi) = 0 $ and $ L(\mu') = L(\mu', \pi^\circ) < L' $, then the point $ (\mu', L(\mu')) $ represents the optimal solution for the dual problem.
+
+and $ L' $ is the maximum value for the current lower envelope, however
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\linewidth]{intersection}
+\caption[sssp]{Here is a DAG for sequence with 6 integers represented using gap(differences between them).}
+\label{fig: intersection}
+\end{figure}
+
 
 
 Recall the definition of \textit{Dominance criterion} in \cite{ottaviano2015optimal},
 
 Our key observation is that each iteration can be implemented by finding the largest $ \lambda_{i,j} $ that approximates $ \mu $ from below.
-
 
 \section{The {\secit Body} of The Paper}
 Typically, the body of a paper is organized
