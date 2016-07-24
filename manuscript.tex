@@ -176,7 +176,7 @@ Thus improving the efficiency while minimizing the compressed size.
 
 However, these methods are either at a coarse granularity or algorithmically complex in practice.
 To tackle these issue, we introduce the notion of \textit{Bicriteria Compression} to formalize the problem of optimally trading the compressed size and decompression time for inverted index.
-We also adopt a Lagrangian relaxation algorithm to solve this problem by reducing it to a knapsack-type problem, which works in {\color{red}{$ O(n\log^{2}n) $}} time and $ O(n) $ space, with a negligible additive approximation.
+We also adopt a Lagrangian relaxation algorithm to solve this problem by reducing it to a knapsack-type problem, which works in {\color{red}{$ O(n\log n) $}} time and $ O(n) $ space, with a negligible additive approximation.
 We perform an extensive experiment to show that our method, which is faster and more theoretically complete, can optimally trading the space for bounded time, and vice versa.
 \end{abstract}
 
@@ -260,7 +260,7 @@ They also fail to explore complexity of the algorithm as it works on a empirical
 Giuseppe et al. \cite{ottaviano2015optimal} explicitly define the Space-Constrained Expected Time Minimization problem: given a dataset $ D $ and an upper bound $ \cal S $ on its compressed size, the goal is to choose one proper encoder from an encoder set $ \cal E $ for each block of the index.
 Thus minimizing the expected query processing time, provided that it can be compressed within $ \cal S $ space.
 They then propose a linear time solution for this problem, which is quite straight forward.
-Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non decreasing order by the time/space gain ratio of each advisable encoder on each block.
+Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non increasing order by the time/space gain ratio of each advisable encoder on each block.
 After this, a sequential scan and replace is able to find all the optional solutions for any possible budget constraint $ \cal S $.
 Given the fact that each posting list is divided into fixed-sized blocks (say, 128 postings), whose total number is $ n $, and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
 
@@ -276,7 +276,7 @@ The main contributions are listed below:
 	It changes the role of space/time by asking for the minimal compressed size, provided an upper bound $ T $ in its average query processing time or decompression time.
 	By solving the \textit{Bicriteria Compression} problem  we can expect our compression method to be more universal for different scenarios.
 	\item We reduce the problem into a Resource Constrained Shortest Path problem \cite{mehlhorn2000resource} over a weighted DAG $ \cal G $, however, edges in $ \cal G $ contain two penalties: space cost and time weight.
-	Thus, the problem can be formalized using Lagrangian relaxation, we use the algorithm introduced in \cite{farruggia2014bicriteria} and \cite{handler1980dual} to settle in $ O(n\log^{2}n) $ time and $ O(n) $ space, while keeping the same additive approximation guarantee.
+	Thus, the problem can be formalized using Lagrangian relaxation, we use the algorithm introduced in \cite{farruggia2014bicriteria} and \cite{handler1980dual} to settle in $ O(n\log n) $ time and $ O(n) $ space, while keeping the same additive approximation guarantee.
 	\item Different from \cite{ottaviano2015optimal} which is a global search algorithm, our method amortizes the expect budget over each posting list.
 	Thus, all the phrases of compression can be processed in a parallel way, runtime space requirement is also reduced without storing options in an index level.
 	Our method is able to keep the additive approximation guarantee under different budgets, however, works much faster in practice.	
@@ -315,6 +315,8 @@ More importantly, with the help of \textit{skip pointers} or \textit{skip list},
 Some of these encoders are \textit{Simple Family}, AFOR and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR).
 
 {\color{red}{we follow the settings used in \cite{ottaviano2015optimal}, that encoders in $ \cal E $ are chosen from list-oriented encoders and posting lists are uniformly split into fixed-size of 128.}}
+
+{\color{red}{blocks are concatenated into one graph $ \cal G $.}}
 
 \subsection{Pareto-optimal Compression}
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
@@ -384,14 +386,11 @@ We set $ t(\pi) = \sum_{i=1}^{n}x_{i,j}\hat{t}_{i,j} $, where $ \hat{t}_{i,j}=f_
 Also, $ f_i $ can be set to 1 if to measure the thorough decompression time of the index.
 
 Now we can formulate our problem using Lagrangian relaxation into the famous RCSP as follows:
-
 \begin{align}
  & \min_{\pi \in \Pi} t(\pi) \notag \\
  \text{s.t.}\quad & s(\pi) \leqslant \cal S \label{equ: RCSP}
 \end{align}
-
 By setting $ f(\pi) = t(\pi) $ and $ g(\pi) = s(\pi)- \mathcal{S} $, we may rewrite the Equation~\eqref{equ: RCSP} as
-
 \begin{align*}
 & \min_{\pi \in \Pi} f(\pi)  \\
 \text{s.t.}\quad & g(\pi) \leqslant 0
@@ -402,23 +401,20 @@ By adopting a dynamic programming approach proposed in \cite{lawler2001combinato
 Unfortunately this bound is still unacceptable is practice.
 
 To efficiently solve the problem we introduce the Lagrangian function to relax the constraint $ g(\pi) \leqslant 0 $:
-
 \begin{align}
 L(\mu,\pi) = f(\pi)+\mu g(\pi) \label{equ: L(u,pi)} \\ 
 \intertext{and let}
 L(\mu) = \min_{\pi \in \Pi} L(\mu,\pi) \label{equ: L(u)}
 \end{align}
-
 \noindent $ \mu $ is the Lagrangian multiplier following $ \mu \geqslant 0 $.
 It has been shown that this problem can be solved in linear time by solving this dual problem \cite{handler1980dual}.
 Let $ \pi $ be the path we find, and $ \pi^\star $ be the optimal path of the RCSP problem.
 At the end of Section~\ref{sec: our alg}, we will have proved the following theorem:
 \newtheorem{theorem}{Theorem}
 \begin{theorem}
-	$ \pi $ can be computed in $ O(\log^2 n) $ time and $ O(n) $ time with its time cost $ t(\pi) \leqslant f(\pi^\star) + t_{max} $ and space cost $ s(\pi) \leqslant T + 2s_{max} $.
+	$ \pi $ can be computed in $ O(\log n) $ time and $ O(n) $ time with its time cost $ t(\pi) \leqslant f(\pi^\star) + t_{max} $ and space cost $ s(\pi) \leqslant S + 2s_{max} $.
 \end{theorem}
-
-\noindent Here we use $ s_{max} $ and $ t_{max} $ to denote the maximum space/time cost of one block.
+Here we use $ s_{max} $ and $ t_{max} $ to denote the maximum space/time cost of one block.
 
 \section{Our approximation Algorithm}\label{sec: our alg}
 In this section we turn to the algorithm which solves the Lagrangian relaxation problem.
@@ -441,23 +437,27 @@ The key step stays in generating the optimal path $ \pi' $ for $ \mu $ in each i
 
 Notice that in Equation~\eqref{equ: L(u,pi)} we have $ \mu \geqslant 0 $ and $ g(\pi) \leqslant 0 $, thus $ L(\mu,\pi) $ representing $ f(\pi) $ adding a negative number.
 As we are trying to find a minimal $ f(\pi) $, we get the following equation:
-
 \begin{equation}
-L(\mu) \leqslant f(\pi^\star)
+L(\mu) \leqslant f(\pi^\star) \label{equ: maximum}
 \end{equation}
-
-\noindent for every $ \mu \geqslant 0 $.
+\noindent For every $ \mu \geqslant 0 $.
 Therefore, an best lower bound for the optimal path in RCSP can be found by solving its dual problem defined as 
-
 \begin{equation}
-L^\star = L(\mu^\star) = \max_{\mu \geqslant 0} L(\mu) =\max_{\mu \geqslant 0} \min_{\pi \in \Pi} f(\pi) + \mu g(\pi)
+L^\star = L(\mu^\star) = \max_{\mu \geqslant 0} L(\mu) =\max_{\mu \geqslant 0} \min_{\pi \in \Pi} \left[ f(\pi) + \mu g(\pi) \right]
 \end{equation}
 
-\noindent Now the problem has been converted from searching for an optimal path to a linear programming calculating maximal $ L(\mu) $, where each path defines a feasible region.
+Now the problem has been converted from searching for an optimal path to a linear programming calculating maximal $ L(\mu) $, where each path defines a feasible region.
 And our goal is find out the vertex which maximize $ L(\mu) $ from the convex hull defined by the intersection of paths.
 
 However, it is impossible to figure out the convex hull using traditional simplex method since there can be $ O(n^k) $ paths.
 Actually we only need a small part of them to heuristically pruning out unfeasible paths and determining the maximal $ L(\mu) $.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\linewidth]{intersection}
+	\caption[sssp]{Here is a DAG for sequence with 6 integers represented using gap(differences between them).
+	{\color{red}{the horizontal line of LB and UB}}	}
+	\label{fig: intersection}
+\end{figure}
 
 The procedure can be best explained geometrically.
 Each path in $ \Pi $ may be associated in $ (\mu, L)（$ space with a line of the form $ L = f(\pi) + \mu g(\pi) $, where $ f(\pi) $ is the intercept along the L-axis and $ g(\pi) $ is the slope of the line.
@@ -468,20 +468,76 @@ If there exists another path $ L(\mu') $ ( generated using $ \mu' $) which furth
 So the whole procedure works to find a minimal maximum of $ L(\mu) $ since $ L(\mu') \geqslant L(\mu^\star) $.
 The iteration stops once $ L(\mu') $ cannot be reduced or we find a path $ \pi^\circ \in \Pi $ with $ g(\pi) = 0 $ and $ L(\mu') = L(\mu', \pi^\circ) < L' $, then the point $ (\mu', L(\mu')) $ represents the optimal solution for the dual problem.
 
-and $ L' $ is the maximum value for the current lower envelope, however
+For a given $ \mu $, a path is called $ \mu $-\textit{optimal} if its Lagrangian cost $ L(\pi,\mu) $ equals to the value of $ L(\mu) $ in equation~\eqref{equ: L(u)}.
+Consider the initial step, which is to find two extreme paths with respect to function $ f(\pi) $ and $ g(\pi) $ respectively.
+Since $ \mu \in [0,+\infty) $ and for each path $ L(\mu) $ represents a monotonic line in $ (\mu,L) $ space.
+Naturally, the extreme path exists at $ \mu = 0 $ and $ \mu=\infty $.
+Let $ \pi(\mu) $ denote an $ \mu $-\textit{optimal} path associating with $ \mu $,
+$ \pi(0) $ corresponds to $ L(0) = \min\{f(\pi)|\pi \in \Pi\} $ which is the minimum of $ f(\pi) $, if $ g(\pi) \leqslant 0 $ then $ \pi(0) $ is also optimal for RCSP.
+And $ \pi(\infty) $ corresponds to the minimum of $ g(\pi) $, if $ g(\pi(\infty)) > 0 $, then there will be no solution for RCSP.
 
-\begin{figure}
-\centering
-\includegraphics[width=0.9\linewidth]{intersection}
-\caption[sssp]{Here is a DAG for sequence with 6 integers represented using gap(differences between them).}
-\label{fig: intersection}
-\end{figure}
+It is easy to prove that $ \pi(0) $ and $ \pi(\infty) $ are exactly time-optimal and space-optimal paths in our scenario.
+We start by setting $ (\pi(0),\pi(\infty)) $ as $ (\pi_l,\pi_r) $, each time we intersect them, we get the point $ \mu' = (f_l - f_r)/(g_r-g_l) $ and $ L'= f_l + \mu' g_l $.
+Then a new path $ \pi' $ is generated as $ L(\mu') $, if $ g(\pi') < 0 $, $ \pi_r $ will replaced by $ \pi' $ and vice versa.
+The procedure terminates when $ L(u') = L' $ or $ g(\pi') = 0 $.
+It has been shown the number of iterations is $ O(\log(n $$ s_{costs} $$ t_{costs})) $ \cite{mehlhorn2000resource}, where $ s_{costs} $ and $ t_{costs} $ represent the block space/time cost in integers, in our scenario these two are negligible constant since block size is fixed to 128.
 
+It remains to describe how to generate an $ \mu $-\textit{optimal} path $ \pi' $ given the point of intersection $ (\mu',L') $.
+A brute force search along the whole graph for $ \pi' $ by evaluating its Lagrangian cost is impossible,
+even our version of  $ \cal G $ has already reduced its number of edges from $ O(n^2) $ to $ O(nk) $ by fixing the edge length.
+However, fixing the size of blocks indeed bring one significant advantage that blocks are kept isolated from each other.
+Thus we can break this problem into numerous subproblems of selecting proper encodings for each block, which minimize its Lagrangian cost given any $ \mu \geqslant 0 $.
+Finally we can sum their space/time costs together without collision.
+Namely,
+\begin{equation*}
+L(\mu,\pi) = L(\sum_{i=1}^{n} e_i, \mu)=\sum_{i=1}^{n}L(e_i,\mu)
+\end{equation*}
+Here $ e_i $ denotes edges in path $ \pi $.
 
+To find the appropriate encodings we need first recall the dominance criteria proposed in \cite{ottaviano2015optimal}: a) Let \textit{p} and \textit{q} be two items in the same class \textit{i}.
+Item \textit{q} is dominated by item \textit{p} if $ s_{i,p} \leqslant s_{i,q} $ and $ \hat{t}_{i,p} < \hat{t}_{i,q} $;
+b) Let \textit{p}, \textit{q} and \textit{r} be three items in the same class such that $ s_{i,p} < s_{i,q} < s_{i,r} $ and $ \hat{t}_{i,p} \geqslant \hat{t}_{i,q} \geqslant \hat{t}_{i,r} $.
+Item \textit{q} is dominated by \textit{p} and \textit{r} if the following condition holds $ \frac{\hat{t}_{i,p} - \hat{t}_{i,q}}{s_{i,p} - s_{i,q}} \geqslant \frac{\hat{t}_{i,q} - \hat{t}_{i,r}}{s_{i,q} - s_{i,r}} $.
+After applying these criteria, for each block we have the dominated items pruned from $ \cal G $ and the rest items sorted in ascending order by their space cost.
+Also a time/space gain ratio between adjacent items is define as $ \lambda_{i,j} = \frac{\hat{t}_{i,j} - \hat{t}_{i,j-1}}{s_{i,j-1} - s_{i,j}} $.
 
-Recall the definition of \textit{Dominance criterion} in \cite{ottaviano2015optimal},
+Let $ L_{i,j} $ denote the Lagrangian cost of the \textit{i}th block encoded by the \textit{j}th encoder.
+Our key observation is that the minimal Lagrangian cost of each block can be found by finding the smallest $ \lambda_{i,j} $ that approximates $ \mu $ from above.
+As shown in the following equation:
+\begin{equation}
+\begin{split}
+L_{i,j} - L_{i,j-1} &= f(e_{i,j}) - f(e_{i,j-1}) + \mu (g(e_{i,j}) - g(e_{i,j-1})) \\
+	&= \hat{t}_{i,j} - \hat{t}_{i,j-1} + \mu (s_{i,j} - s_{i,j-1}) \\
+	&= \lambda_{i,j}(s_{i,j-1} - s_{i,j}) + \mu (s_{i,j} - s_{i,j-1}) \\
+	&= (s_{i,j} - s_{i,j-1})(\mu - \lambda_{i,j})
+\end{split}
+\end{equation}
+Since $ s_{i,j} > s_{i,j-1} $, encodings with $ \lambda_{i,j} \geqslant \mu $ will reduce the cost of current block,
+and the minimal $ L_i $ is exactly $\min\{ \lambda_{i,j}| \lambda_{i,j} \geqslant \mu \}  $.
 
-Our key observation is that each iteration can be implemented by finding the largest $ \lambda_{i,j} $ that approximates $ \mu $ from below.
+The set of $ \lambda $s is sorted once and accessed many times, this can be done in constant time with simple operations since there are only $ k $ encoders to choose.
+Here, we emphasize that the above operations are carried out within a block level rather than the whole index.
+To generate a 1-\textit{n} path would obviously cost $ O(nk) $ time and space.
+Recall the number of iterations previously mentioned, the dual problem can be solved in $ O(\tilde{n} $$ \log(n$$ s_{costs} $$ t_{costs})) $ time and $ O(\tilde{n}) $ space, where $ \tilde{n} = nk $ is the $ \cal G $'s size.
+
+\subsection{Closing the Gap}
+Upon termination of the iteration we have two paths $ (\pi_l,\pi_r) $ which specify a lower bound and an upper bound of the minimal value $ f(\pi^\star) $.
+From Equation~\eqref{equ: maximum}, we know the lower bound is the intersection point, namely $ LB =  L(\mu^\star) $; also, any path $ \pi $ with $ g(\pi) \leqslant 0 $ generated during the iteration is a feasible solution for RCSP, and the best value for upper bound is $ f(\pi_r) $ from the last path $ \pi_r $.
+Thus we have the bound $ L(\mu^\star) \leqslant f(\pi^\star) \leqslant f(\pi_r) $, which is also shown in Figure~\ref{fig: intersection}.
+
+Obviously, if $ L(\mu^\star) = f(\pi_r) $ or any one path in $ (\pi_l,\pi_r) $ satisfies $ g(\pi) = 0 $, there would be no duality gap between solutions to RCSP and its dual problem.
+However, this rarely happens in practice.
+Therefore we have to deal with duality gap until an optimal path is found for RCSP.
+
+Following \cite{farruggia2014bicriteria}, we reuse the path-swapping algorithm introduced for this task.
+The notion of \textit{path swapping} can be explained as follow: given a pair of paths $ (\pi_l,\pi_r) $, we first choose one point $ v $ along the paths arbitrarily as a \textit{pivot}, then we create two new paths $ (\pi_1,\pi_2) $ by exchanging edges before the pivot of $ (\pi_l,\pi_r) $.
+In our context, the algorithm is greatly simplified since edges of all paths have fixed start and end points, we do not need to consider cases where edges are split or merged for shared pivot.
+It has been shown that any path generated by path-swap is off at most off at most $ t_max $ in time and $ s_max $ in space from being a $ \mu $-optimal path, $ t_max $ and $ s_max $ denote maximum time/space cost of one block.
+Indeed, the operation is executed on two closely resembled $ \mu $-optimal paths edge-wise.
+By moving the pivot from left to right, we are actually substituting path $ \pi_l $ for path $ \pi_r $ edge by edge.
+These intermediate paths are naturally bounded by $ \pi_l $ and $ \pi_r $, and there definitely exists a $ \mu $-optimal path whose cost is at most one block-size smaller than these paths.
+
+ 
 
 \section{The {\secit Body} of The Paper}
 Typically, the body of a paper is organized
