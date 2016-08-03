@@ -48,8 +48,9 @@
 \documentclass{sig-alternate-05-2015}
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{amsmath,amssymb}
-\usepackage{multirow,booktabs,makecell}
+\usepackage{multirow,booktabs,makecell,color,colortbl}
 \usepackage{color}
+\usepackage{balance}
 \graphicspath{{./pdf/}}
 
 \begin{document}
@@ -71,163 +72,87 @@
 \isbn{123-4567-24-567/08/06}
 
 %Conference
-\conferenceinfo{PLDI '13}{June 16--19, 2013, Seattle, WA, USA}
+\conferenceinfo{WSDM '17}{February 6-10, 2017, Cambridge, UK}
 
 \acmPrice{\$15.00}
 
 %
 % --- Author Metadata here ---
-\conferenceinfo{WOODSTOCK}{'97 El Paso, Texas USA}
+%\conferenceinfo{WSDM}{'17 Cambridge, UK}
 %\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
 
 \title{A Flexible Space-time Tradeoff on Hybrid Index with Bicriteria Optimization}
-%\subtitle{
-%[Extended Abstract]\titlenote{A full version of this paper is available as \textit{Author's Guide to Preparing ACM SIG Proceedings Using \LaTeX$2_\epsilon$\ and BibTeX} at \texttt{www.acm.org/eaddress.htm}}
-%	}
-%
-% You need the command \numberofauthors to handle the 'placement
-% and alignment' of the authors beneath the title.
-%
-% For aesthetic reasons, we recommend 'three authors at a time'
-% i.e. three 'name/affiliation blocks' be placed beneath the title.
-%
-% NOTE: You are NOT restricted in how many 'rows' of
-% "name/affiliations" may appear. We just ask that you restrict
-% the number of 'columns' to three.
-%
-% Because of the available 'opening page real-estate'
-% we ask you to refrain from putting more than six authors
-% (two rows with three columns) beneath the article title.
-% More than six makes the first-page appear very cluttered indeed.
-%
-% Use the \alignauthor commands to handle the names
-% and affiliations for an 'aesthetic maximum' of six authors.
-% Add names, affiliations, addresses for
-% the seventh etc. author(s) as the argument for the
-% \additionalauthors command.
-% These 'additional authors' will be output/set for you
-% without further effort on your part as the last section in
-% the body of your article BEFORE References or any Appendices.
 
 \numberofauthors{4} %  in this sample file, there are a *total*
 % of EIGHT authors. SIX appear on the 'first-page' (for formatting
 % reasons) and the remaining two appear in the \additionalauthors section.
 %
 \author{
-% You can go ahead and credit any number of authors here,
-% e.g. one 'row of three' or two rows (consisting of one row of three
-% and a second row of one, two or three).
-%
-% The command \alignauthor (no curly braces needed) should
-% precede each author name, affiliation/snail-mail address and
-% e-mail address. Additionally, tag each line of
-% affiliation/address with \affaddr, and tag the
-% e-mail address with \email.
-%
 %AUTOR
-%% 1st. author
-\alignauthor Xingshen Song\\
-\affaddr{College of Computer}\\
-\affaddr{National University of Defense Technology}\\
-\affaddr{Changsha, China}\\
-\email{songxingshen@nudt.edu}
-% 2nd. author
-\alignauthor Yuexiang Yang\\
-\affaddr{College of Computer}\\
-\affaddr{National University of Defense Technology}\\
-\affaddr{Changsha, China}\\
-\email{yyx@nudt.edu}
-% 3rd. author
-\alignauthor Kun Jiang\\
-\affaddr{School of Electronic and Information Engineering}\\
-\affaddr{Xi'an Jiaotong University}\\
-\affaddr{Xi'an, China}\\
-\email{jk\_365@126.com}
-\and  % use '\and' if you need 'another row' of author names
-% 4th. author
-\alignauthor Yu Jiang\\
-\affaddr{College of Computer}\\
-\affaddr{National University of Defense Technology}\\
-\affaddr{Changsha, China}\\
-\email{jiangyu@nudt.edu}
+%%% 1st. author
+%\alignauthor Xingshen Song\\
+%\affaddr{College of Computer}\\
+%\affaddr{National University of Defense Technology}\\
+%\affaddr{Changsha, China}\\
+%\email{songxingshen@nudt.edu}
+%% 2nd. author
+%\alignauthor Yuexiang Yang\\
+%\affaddr{College of Computer}\\
+%\affaddr{National University of Defense Technology}\\
+%\affaddr{Changsha, China}\\
+%\email{yyx@nudt.edu}
+%% 3rd. author
+%\alignauthor Kun Jiang\\
+%\affaddr{School of Electronic and Information Engineering}\\
+%\affaddr{Xi'an Jiaotong University}\\
+%\affaddr{Xi'an, China}\\
+%\email{jk\_365@126.com}
+%\and  % use '\and' if you need 'another row' of author names
+%% 4th. author
+%\alignauthor Yu Jiang\\
+%\affaddr{College of Computer}\\
+%\affaddr{National University of Defense Technology}\\
+%\affaddr{Changsha, China}\\
+%\email{jiangyu@nudt.edu}
 %AUTHOR
 }
-% There's nothing stopping you putting the seventh, eighth, etc.
-% author on the opening page (as the 'third row') but we ask,
-% for aesthetic reasons that you place these 'additional authors'
-% in the \additional authors block, viz.
-%\additionalauthors{Additional authors: John Smith (The Th{\o}rv{\"a}ld Group,
-%email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
-%(The Kumquat Consortium, email: {\texttt{jpkumquat@consortium.net}}).}
 \date{12 July 2016}
-% Just remember to make sure that the TOTAL number of authors
-% is the number that will appear on the first page PLUS the
-% number that will appear in the \additionalauthors section.
 
 \maketitle
 \begin{abstract}
 Inverted Indexes are widely adopted in the vast majority of information systems.
 Growing requirement for efficient query processing has motivated various compression techniques with different space-time characteristics.
 While a single encoder yields a relatively stable point in the space-time tradeoff curve, flexibly transforming its characteristic along the curve to fit different IR tasks can be a better way to prepare the index.
-Recent Research come out with an idea of combining different encoders within the same index, namely, exploiting access skewness by compressing frequently accessed regions with faster encoders and rarely accessed regions with succinct encoders.
+Recent Research come out with an idea of integrating different encoders within the same index, namely, exploiting access skewness by compressing frequently accessed regions with faster encoders and rarely accessed regions with succinct encoders.
 Thus improving the efficiency while minimizing the compressed size.
 
 However, these methods are either at a coarse granularity or algorithmically complex in practice.
-To tackle these issue, we introduce the notion of \textit{Bicriteria Compression} to formalize the problem of optimally trading the compressed size and decompression time for inverted index.
-We also adopt a Lagrangian relaxation algorithm to solve this problem by reducing it to a knapsack-type problem, which works in {\color{red}{$ O(n\log n) $}} time and $ O(n) $ space, with a negligible additive approximation.
-We perform an extensive experiment to show that our method, which is faster and more theoretically complete, can optimally trading the space for bounded time, and vice versa.
+To tackle these issues, we introduce the notion of \textit{Bicriteria Compression} to formalize the problem of optimally trading the compressed size and query processing time for inverted index.
+We also adopt a Lagrangian relaxation algorithm to solve this problem by reducing it to a knapsack-type problem, which works in $ O(n\log n) $ time and $ O(n) $ space, with a negligible additive approximation.
+We perform an extensive experiment to show that, given bounded time/space budget, our method can optimally trading one for another with more efficient indexing and query performance.
 \end{abstract}
 
-
-%
-% The code below should be generated by the tool at
-% http://dl.acm.org/ccs.cfm
-% Please copy and paste the code instead of the example below. 
-%
 \begin{CCSXML}
-<ccs2012>
- <concept>
-  <concept_id>10010520.10010553.10010562</concept_id>
-  <concept_desc>Computer systems organization~Embedded systems</concept_desc>
-  <concept_significance>500</concept_significance>
- </concept>
- <concept>
-  <concept_id>10010520.10010575.10010755</concept_id>
-  <concept_desc>Computer systems organization~Redundancy</concept_desc>
-  <concept_significance>300</concept_significance>
- </concept>
- <concept>
-  <concept_id>10010520.10010553.10010554</concept_id>
-  <concept_desc>Computer systems organization~Robotics</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
- <concept>
-  <concept_id>10003033.10003083.10003095</concept_id>
-  <concept_desc>Networks~Network reliability</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
-</ccs2012>  
+	<ccs2012>
+	<concept>
+	<concept_id>10002951.10002952.10002971.10003451.10002975</concept_id>
+	<concept_desc>Information systems~Data compression</concept_desc>
+	<concept_significance>500</concept_significance>
+	</concept>
+	<concept>
+	<concept_id>10002951.10003317.10003365.10003367</concept_id>
+	<concept_desc>Information systems~Search index compression</concept_desc>
+	<concept_significance>500</concept_significance>
+	</concept>
+	</ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Computer systems organization~Embedded systems}
-\ccsdesc[300]{Computer systems organization~Redundancy}
-\ccsdesc{Computer systems organization~Robotics}
-\ccsdesc[100]{Networks~Network reliability}
+\ccsdesc[500]{Information systems~Data compression}
+\ccsdesc[500]{Information systems~Search index compression}
 
-
-%
-% End generated code
-%
-
-%
-%  Use this command to print the description
-%
 \printccsdesc
-
-% We no longer use \terms command
-%\terms{Theory}
 
 \keywords{Inverted Index; Bicriteria Compression; Lagrangian Relaxation}
 
@@ -238,10 +163,8 @@ Despite of the fact that it is a relatively old yet simple data structure, inver
 Compression has been one of the most active field of inverted index research in the last decades, for it not only reduces the space occupancy, but also accelerates data transfer in I/O.
 See \cite{catena2014inverted,trotman2014compression,zobel2006inverted} for a detailed survey.
 
-Traditional inverted index is composed of two parts: \textit{dictionary} and \textit{posting lists}.
-The former contains pointers mapping term to its corresponding posting list, while the latter contains the docid of the matching document, the frequency of occurrence in the document, and positional information (if to support phrasal and proximity matching).
-The inverted index compression  we are talking about is usually concentrated in the compression of posting lists.
-
+Typical inverted index is composed of two parts: \textit{lexicon} and \textit{posting lists}.
+The inverted index compression we are talking about is usually concentrated in the compression of posting lists.
 However, there exists a divergence between compressed size and decompression time,
 since pursuing the minimization of size will undoubtedly impair decoding.
 Encoders with different space-time treadoffs keep coming out to settle for requirements of various user scenarios \cite{lemire2015decoding,ottaviano2015optimal,ottaviano2014partitioned,petri2014score,silvestri2010vsencoding}.
@@ -262,41 +185,40 @@ Thus minimizing the expected query processing time, provided that it can be comp
 They then propose a linear time solution for this problem, which is quite straight forward.
 Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non increasing order by the time/space gain ratio of each advisable encoder on each block.
 After this, a sequential scan and replace is able to find all the optional solutions for any possible budget constraint $ \cal S $.
-Given the fact that each posting list is divided into fixed-sized blocks (say, 128 postings), whose total number is $ n $, and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
+Given the fact that each posting list is divided into fixed-sized blocks, whose total number is $ n $, and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
 
 By refining the granularity to block level and the carefully designed algorithm, they are able to find a solution with minimal query time.
 Also, the approximation is additive, which is at most a block size larger than $ \cal S $.
 However, the algorithm takes too much space to sort the compression options that it can be hardly fit into memory; second, since the sorting and sequential scan cannot be accelerated by parallel, the whole procedure is delay by them somehow; third, their solution is based on assumption that the posting lists are split into fixed-sized blocks, otherwise the compression options are hardly to sort and might take much more space. 
 
 We argue that global ordering of the compression options for all the blocks is not a good idea, since it will lead to the above three shortcomings.
-In this paper, we try to attack this problem from another perspective.
+In this paper, we try to solve this problem from another perspective.
 The main contributions are listed below:
 \begin{enumerate}
-	\item We introduce the conception of \textit{Bicriteria Compression} problem \cite{farruggia2014bicriteria} to extend the Space-Constrained Expected Time Minimization problem, which contains another dual problem.
-	It changes the role of space/time by asking for the minimal compressed size, provided an upper bound $ T $ in its average query processing time or decompression time.
-	By solving the \textit{Bicriteria Compression} problem  we can expect our compression method to be more universal for different scenarios.
-	\item We reduce the problem into a Resource Constrained Shortest Path problem \cite{mehlhorn2000resource} over a weighted DAG $ \cal G $, however, edges in $ \cal G $ contain two penalties: space cost and time weight.
+	\item We introduce the conception of \textit{Bicriteria Compression} \cite{farruggia2014bicriteria} to extend the Space-Constrained Expected Time Minimization problem.
+	Except the original one, it models another dual problem: we could exchange the role of space and time by asking for the minimal compressed size, provided an upper bound $ T $ in its average query processing time or decompression time.
+	By solving the \textit{Bicriteria Compression} problem we can expect the compression method to be more universal for different scenarios.
+	\item We reduce the problem into a Resource Constrained Shortest Path problem \cite{mehlhorn2000resource} over a weighted DAG $ \cal G $, whose edges contain two kinds of penalties: space cost and time weight.
 	Thus, the problem can be formalized using Lagrangian relaxation, we use the algorithm introduced in \cite{farruggia2014bicriteria} and \cite{handler1980dual} to settle in $ O(n\log n) $ time and $ O(n) $ space, while keeping the same additive approximation guarantee.
-	\item Different from \cite{ottaviano2015optimal} which is a global search algorithm, our method amortizes the expect budget over each posting list.
-	Thus, all the phrases of compression can be processed in a parallel way, runtime space requirement is also reduced without storing options in an index level.
-	Our method is able to keep the additive approximation guarantee under different budgets, however, works much faster in practice.	
-	{\color{red} Use data to demonstrate it}.
-	\item we execute a preliminary set of experiments on two realistic dataset, GOV2 and Common Crawl, with AOL query log.
+	\item Different from \cite{ottaviano2015optimal} which is a greedy algorithm, our method amortizes the expected budget over each posting list in a more balanced way.
+	Thus we could expect for a better average performance.
+	While keeping the same space and time complexity, our method is more efficient and needs less runtime memory in practice without global sorting.
+	\item We execute a preliminary set of experiments on two realistic dataset, GOV2 and Common Crawl, with AOL query log.
 	Analysis shows that our method is able to obtain flexible tradeoffs under bicriteria compression.
 	Its compressed size and query processing time is very competitive to the hybrid index in \cite{ottaviano2015optimal}, however, with more detailed description and more strict theoretic foundation.
 \end{enumerate}
 
 \section{Preliminaries}\label{sec: preliminaries}
 \subsection{Index Structure and Compression}
-Given a collection of \textit{D} documents, an inverted index can be seen as a big table mapping each unique \textit{term} to a\textit{ posting list} which contains all the document identifiers (called \textit{docid}) and the number of occurrences in the document (called \textit{frequency}), and possibly other information like the positions of each occurrence within the documents.
+Given a collection of \textit{D} documents, an inverted index can be seen as a big table mapping each unique \textit{term} to a\textit{ posting list} which contains all the document identifiers (called \textit{docid}) and the number of occurrences in the document (called \textit{frequency}), and possibly other information like the positions of each occurrence within the documents (if to support phrasal and proximity matching).
 The set of terms is called \textit{lexicon}, which is relatively small compared to postings.
 To rank the documents in response to a query, the posting list for the terms of the query must be traversed.
-There is a vast variety of literature study on structures and query processing strategies, see \cite{ding2011faster,navarro2010dual} for a detailed survey.
+There is a vast variety of literature study on structures and query processing strategies, see \cite{ding2011faster,konow2013faster,navarro2010dual} for a detailed survey.
 
-Different orderings of the postings in the posting list change both the algorithm for ranked retrieval and the underlying representation of the postings in the inverted index.
-Generally, there are two kinds of orderings, namely the docid-sorted and frequency-sorted, in docid-sorted index postings are sorted by docid in ascending order, allowing efficient compression and fast query processing; in frequency-sorted index postings are sorted by frequency in descending order and postings with same frequency are sorted by docid, an early termination can be reached for ranked query since the most promising postings are placed close to the start of the list.
-A fatal problem with frequency-sorted index is that unordered docids are hard to compress, commercial search engines reportedly use the former obtain very good results by \cite{dimopoulos2013optimizing}.
-The appropriate compression of docid-sorted index is the focus of our work.
+%Different orderings of the postings in the posting list change both the algorithm for ranked retrieval and the underlying representation of the postings in the inverted index.
+%Generally, there are two kinds of orderings, namely the docid-sorted and frequency-sorted, in docid-sorted index postings are sorted by docid in ascending order, allowing efficient compression and fast query processing; in frequency-sorted index postings are sorted by frequency in descending order and postings with same frequency are sorted by docid, an early termination can be reached for ranked query since the most promising postings are placed close to the start of the list.
+%A fatal problem with frequency-sorted index is that unordered docids are hard to compress, commercial search engines reportedly use the former obtain very good results by \cite{dimopoulos2013optimizing}.
+%The appropriate compression of docid-sorted index is the focus of our work.
 
 To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
 Hence, the task of index compression is best viewed code sequences of integers of the form $x_{1},x_{2},x_{3},\ldots,x_{n}$ where $x_{i}\geqslant0$ for all $1\leqslant i\leqslant n$, and $n\geqslant1$ is the length of the sequence (\cite{anh2010index}).
@@ -308,15 +230,14 @@ The integer-oriented encoders assign an unique codeword to each integer of the i
 As they compress integers without considering their neighborings, the integer-oriented encoders are also called oblivious encoders\cite{catena2014inverted}, such as \textit{unary code, Elias Gamma/Delta codes \emph{and} Golomb/Rice codes}.
 Most integer-oriented encoders are hard to decode since they need bitwise operations to cross computer word boundaries, so byte/word-aligned encoders, are proposed to solve this problem, like \textit{Variable Byte} and \textit{Group Varint}, more importantly, they can be further improved by SIMD instructions of modern CPUs\cite{stepanov2011simd,trotman2014compression}.
 
-List-oriented encoders are designed to exploit the cluster of neighboring integers, each time a fixed-sized or variable-sized group of integers is binary packed with an uniform bit width, providing equivalent compression ratio and faster decoding speed, the technique used by these encoders is called \textit{frame-of-reference}(FOR), or \textit{binary packing}\cite{goldstein1998compressing}.
+List-oriented encoders are designed to exploit the cluster of neighboring integers, each time a fixed-sized or variable-sized group of integers is binary packed with an uniform bit width, providing equivalent compression ratio and faster decoding speed, the technique used by these encoders is called \textit{frame-of-reference}(FOR), or \textit{binary packing}\cite{delbru2010adaptive,goldstein1998compressing}.
 Basically, their compression ratios are inferior to these of the first category as a batch of integers are encoded indiscriminately, and useless zeros are filled in the codeword to keep word-aligned.
 However, when decoded, list-oriented encoders can obtain an entire block while the formers just decode one integer at a time.
 More importantly, with the help of \textit{skip pointers} or \textit{skip list}, it is possible to step along the codewords compressed by list-oriented encoders and stop when the required number of blocks has been bypassed.
-Some of these encoders are \textit{Simple Family}, AFOR and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR).
+Some of these encoders are \textit{Simple Family} \cite{anh2004index,anh2005inverted,anh2006improved,anh2010index}, AFOR \cite{delbru2012searching} and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR) \cite{lemire2015decoding,yan2009inverted,zukowski2006super}.
 
-{\color{red}{we follow the settings used in \cite{ottaviano2015optimal}, that encoders in $ \cal E $ are chosen from list-oriented encoders and posting lists are uniformly split into fixed-size of 128.}}
-
-{\color{red}{blocks are concatenated into one graph $ \cal G $.}}
+In our scenario, we follow the settings used in \cite{ottaviano2015optimal}, that encoders in $ \cal E $ are chosen from list-oriented encoders and posting lists are uniformly split into fixed-sized blocks of 128 postings.
+And those posting lists are virtually concatenated into one large list to facilitate our computation under bounded space/time budget, as we only store some statistics about each block, this will not take too much space.
 
 \subsection{Pareto-optimal Compression}
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
@@ -345,22 +266,21 @@ The problem of fully partitioning $ L $ is converted to finding a path $\pi \in 
 
 It has been commonly used in many list-oriented encoders \cite{song2016optimizing}.
 These encoders usually partition a posting list into chunks of different lengths aligning to its local clusters.
-Earlier ones like Fixed Binary \cite{anh2004index} and AFOR \cite{delbru2010adaptive} use a simple greedy search without backtracking.
+Earlier ones like Fixed Binary \cite{anh2004index} and AFOR use a simple greedy search without backtracking.
 Silvestri and Venturini introduce dynamic programming recurrence for VSEncoding \cite{silvestri2010vsencoding} while Guiseppe et al. resort to a more efficient approximation algorithm.
-
 \begin{figure}
 	\centering
-	\subfloat[fixing $\varepsilon_{1}=0$, varying $\varepsilon_{2}$ from 0.1 to 1]{
-		\label{fig:epsilon:b}
+	\subfloat[DAG for SSSP problem, edges have different lengths and are attatched with one space cost.]{
+		\label{fig: sssp}
 		\includegraphics[width=1.0\linewidth]{sssp}
 	}\\
-	\subfloat[fixing $\varepsilon_{2}$ to values got above, varying $\varepsilon_{1}$ from 0 to 0.1]{
-		\label{fig:phi:a}
+	\subfloat[DAG for RCSP, edges have fixed length (128) and are attached with space cost and time weight. ]{
+		\label{fig: rcsp}
 		\includegraphics[width=1.0\linewidth]{rcsp}
 	}
 	
-	\caption{Influences of the parameters $\varepsilon_{2}$ and $\varepsilon_{1}$ on two partitioning strategies.}
-	\label{fig:parameter}
+	\caption{Shortest path finding on two kinds of DAGs, we use red lines to illustrate how to build one feasible path from start to end.}
+	\label{fig: DAG}
 \end{figure}
 
 However, our version of DAG $ \cal G $ has quite different definitions.
@@ -368,13 +288,13 @@ The above methods are designed to pursue space-optimal partitioning at all costs
 Our goal is to find one pareto-optimal solution under predefined space/time budget, in the new graph, each edge will have attached two weights: a \textit{time weight}, that accounts for the time to decompress a block, and a \textit{space cost}, that accounts for the number of bits needed to store a block associated to that edge.
 The most notable contrast in our $ \cal G $ lies in the blocks of constant-size, which determine edge have fixed start and end points.
 Between these points, there can be multiple edges to choose from due to the diversity of encoders.
-So the total number of edges are exactly $ k \cdot \lceil \dfrac{m}{128} \rceil  $ rather than $ O(m^2) $.
+So the total number of edges are exactly $ k \cdot \lceil \dfrac{m}{128} \rceil $ rather than $ O(m^2) $.
 For every path $ \pi $ from node 1 to node $ m $, we use $ s(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}x_{i,j}s_{i,j} $ to represent the whole compressed size, where $ l= \lceil \dfrac{m}{128} \rceil$, $ x_{i,j} $ represents the choice of the encoder for block $ i $, and is 1 if the chosen encoder is $ j $ and 0 otherwise, $ s_{i,j} $ denotes the space cost of block $ i $ using encoder $ \mathcal{E}_j $.
 Accordingly, the total decompression time is set to be $ t(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}t_{i,j} $.
 Thus we are able to rephrase the bicriteria compression problem into a Resource Constrained Shortest Path problem (RCSP) over the double weighted $ \cal G $, namely finding a path $ \pi $ whose decompression time $ s(\pi) < S $ while its compressed size $ t(\pi) $ minimized.
 Symmetrically, we can also exchange the role of space/time resources, which asks minimal $ s(\pi) $ with $ t(\pi) < T $.
 For the sake of convenience, we will consider the first formulation only in the rest of the paper. 
-
+An example of two different DAGs is shown in Figure~\ref{fig: DAG}.
 %The common foundation for the abovementioned methods is to recast the integer sequence $\mathcal{S} \left[ 0,n \right]$ to a particular DAG $\mathcal{G}$, each integer is represented by a vertex, plus a dummy vertex marking the end of the sequence.
 %The graph $\mathcal{G}$ is complete, which means that for any $i$ and $j$ with $i < j \leqslant n$, there exists an edge connecting $v_{i}$ and $v_{j}$, denoted as $\left( v_{i}, v_{j} \right)$.
 %In fact, the edge is an exact correspondence of a partition in the sequence $\mathcal{S}\left[i,j \right] $, the problem of fully partitioning $\mathcal{S}$ is converted to finding a path $\pi$ in $\mathcal{G}$, for instance, $\pi=\left( v_{0}, v_{i_{1}} \right) \left( v_{i_{1}}, v_{i_{2}} \right)\ldots\left( v_{i_{k-1}}, v_{n} \right)$ with $k$ edges corresponds to the partition $\mathcal{S}\left[0,i_{1}-1 \right]\mathcal{S}\left[i_{1},i_{2}-1 \right] \ldots\mathcal{S}\left[i_{k-1},n-1\right] $ of $k$ blocks.
@@ -399,7 +319,7 @@ Now we can formulate our problem using Lagrangian relaxation into the famous RCS
 \end{align}
 By setting $ f(\pi) = t(\pi) $ and $ g(\pi) = s(\pi)- \mathcal{S} $, we may rewrite the Equation~\eqref{equ: RCSP} as
 \begin{align*}
-& \min_{\pi \in \Pi} f(\pi)  \\
+& \min_{\pi \in \Pi} f(\pi) \\
 \text{s.t.}\quad & g(\pi) \leqslant 0
 \end{align*}
 
@@ -460,9 +380,8 @@ However, it is impossible to figure out the convex hull using traditional simple
 Actually we only need a small part of them to heuristically pruning out unfeasible paths and determining the maximal $ L(\mu) $.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\linewidth]{intersection}
-	\caption[sssp]{Here is a DAG for sequence with 6 integers represented using gap(differences between them).
-	{\color{red}{the horizontal line of LB and UB}}	}
+	\includegraphics[width=1.0\linewidth]{intersection}
+	\caption{Each path $ \pi $ corresponds to a line in the $ (\mu, L) $ space, we only keep one pair of lines formed by $ (\pi_l, \pi_r) $ and their intersection point is the maximum of current $ L(\mu') $. The iteration tries to find the minimal $ L(\mu') $ as lower bound, the upper bound is the $ L $-intercept of the last $ \pi_r $.}
 	\label{fig: intersection}
 \end{figure}
 
@@ -488,6 +407,7 @@ We start by setting $ (\pi(0),\pi(\infty)) $ as $ (\pi_l,\pi_r) $, each time we 
 Then a new path $ \pi' $ is generated as $ L(\mu') $, if $ g(\pi') < 0 $, $ \pi_r $ will replaced by $ \pi' $ and vice versa.
 The procedure terminates when $ L(u') = L' $ or $ g(\pi') = 0 $.
 It has been shown the number of iterations is $ O(\log(n $$ s_{costs} $$ t_{costs})) $ \cite{mehlhorn2000resource}, where $ s_{costs} $ and $ t_{costs} $ represent the block space/time cost in integers, in our scenario these two are negligible constant since block size is fixed to 128.
+This procedure is illustrated in Figure~\ref{fig: intersection}.
 
 It remains to describe how to generate an $ \mu $-\textit{optimal} path $ \pi' $ given the point of intersection $ (\mu',L') $.
 A brute force search along the whole graph for $ \pi' $ by evaluating its Lagrangian cost is impossible,
@@ -520,16 +440,16 @@ L_{i,j} - L_{i,j-1} &= f(e_{i,j}) - f(e_{i,j-1}) + \mu (g(e_{i,j}) - g(e_{i,j-1}
 \end{split}
 \end{equation}
 Since $ s_{i,j} > s_{i,j-1} $, encodings with $ \lambda_{i,j} \geqslant \mu $ will reduce the cost of current block,
-and the minimal $ L_i $ is exactly $\min\{ \lambda_{i,j}| \lambda_{i,j} \geqslant \mu \}  $.
+and the minimal $ L_i $ is exactly $\min\{ \lambda_{i,j}| \lambda_{i,j} \geqslant \mu \} $.
 
 The set of $ \lambda $s is sorted once and accessed many times, this can be done in constant time with simple operations since there are only $ k $ encoders to choose.
 Here, we emphasize that the above operations are carried out within a block level rather than the whole index.
 To generate a 1-\textit{n} path would obviously cost $ O(nk) $ time and space.
-Recall the number of iterations previously mentioned, the dual problem can be solved in $ O(\tilde{n} $$ \log(n$$ s_{costs} $$ t_{costs})) $ time and $ O(\tilde{n}) $ space, where $ \tilde{n} = nk $ is the $ \cal G $'s size.
+Recall the number of iterations previously mentioned, the dual problem can be solved in $ O(\tilde{n}\log(ns_{costs}t_{costs})) $ time and $ O(\tilde{n}) $ space, where $ \tilde{n} = nk $ is the $ \cal G $'s size.
 
 \subsection{Closing the Gap}
-Upon termination of the iteration we have two paths $ (\pi_l,\pi_r) $ which specify a lower bound and an upper bound of the minimal value $ f(\pi^\star) $.
-From Equation~\eqref{equ: maximum}, we know the lower bound is the intersection point, namely $ LB =  L(\mu^\star) $; also, any path $ \pi $ with $ g(\pi) \leqslant 0 $ generated during the iteration is a feasible solution for RCSP, and the best value for upper bound is $ f(\pi_r) $ from the last path $ \pi_r $.
+Upon termination of the iteration we have two paths $ (\pi_l,$ $\pi_r) $ which specify a lower bound and an upper bound of the minimal value $ f(\pi^\star) $.
+From Equation~\eqref{equ: maximum}, we know the lower bound is the intersection point, namely $ LB = L(\mu^\star) $; also, any path $ \pi $ with $ g(\pi) \leqslant 0 $ generated during the iteration is a feasible solution for RCSP, and the best value for upper bound is $ f(\pi_r) $ from the last path $ \pi_r $.
 Thus we have the bound $ L(\mu^\star) \leqslant f(\pi^\star) \leqslant f(\pi_r) $, which is also shown in Figure~\ref{fig: intersection}.
 
 Obviously, if $ L(\mu^\star) = f(\pi_r) $ or any one path in $ (\pi_l,\pi_r) $ satisfies $ g(\pi) = 0 $, there would be no duality gap between solutions to RCSP and its dual problem.
@@ -549,9 +469,9 @@ A left-to-right scanning is sufficient to change the Lagrangian cost from $ L(\m
 During the procedure, we only need an accumulator to store the current pivot and time/space cost, thus the path-swap algorithm can be done in $ O(n) $ time and $ O(1) $ space.
 
 \section{Experiments}\label{sec: experiments}
-In order to provide an experimental evaluation of the proposed compression technique, we have implemented our algorithm in C++.
-All the code related with experiments is available at GitHub\footnote{Anonymized for review}.
-In special, we would like to compare its efficiency and compression effectiveness with the original method in \cite{ottaviano2015optimal}, so we retain most configurations of their experiments to avoid interference from other factors.
+In order to provide an experimental evaluation of the proposed compression technique, we have implemented our algorithm, which we call \textit{bicriteria}, in C++.
+All the codes related with experiments are available at GitHub\footnote{Anonymized for review}.
+In special, we would like to compare its efficiency and compression effectiveness with the original method called \textit{hybrid} in \cite{ottaviano2015optimal}, so we retain most configurations of their experiments to avoid interference from other factors.
 
 \subsection{Experimental Setup}
 We choose the same encoder set $ \cal E $ used in \cite{ottaviano2015optimal}, namely Interpolative, PFD(\textit{h}) and Varint-G8IU.
@@ -578,7 +498,7 @@ Table~\ref{tab: collection statistics} compares these two collections using some
 		& \multicolumn{1}{c}{GOV2} & \multicolumn{1}{c}{Common Crawl} \\
 		\midrule
 		Documents & 25,203,921 & 17,157,948 \\
-		Terms  & 15,324,160 & 51,990,893 \\
+		Terms & 15,324,160 & 51,990,893 \\
 		Pointers & 4,655,778,182 & 9,118,361,737 \\
 		Document Length(avg.) & 645.25 & 2151.83 \\
 		Posting List Length(avg.) & 303.82 & 173.38 \\
@@ -595,394 +515,161 @@ All the implementations are carried out on a PC server with an 8 core Intel(r) X
 
 The query set $ \cal Q $ we use is a realistic query log released by AOL \cite{pass2006picture}.
 It contains of about 20 million Web queries collected from 650 thousand users over three months.
-We first execute all the queries using ranked AND, WAND and MaxScore to count up the access statistics $ f_i $ of each block, then we randomly pick 10000 queries, which contains at least 2 terms present in the posting list, to examine query efficiency of the built index.
+We first execute all the queries using processing strategies that will be used in experiment to count up the access statistics $ f_i $ of each block.
+Then we randomly pick 10000 queries, which contains at least 2 terms present in the posting lists, to examine query efficiency of the built index.
 Before performing queries, the whole inverted index is completely loaded into main memory, in order to avoid the confusion caused by disk I/O.
 
+\subsection{Indexing Performance}
+\paragraph*{Construction time}
+We have analyzed our algorithm in detail in the previous section.
+Its complexity is $ O(\tilde{n} $$ \log(n $ $ s_{costs} $$ t_{costs})) $ in time and $ O(\tilde{n}) $ in space, almost equaled by \textit{hybrid} which is $ O(\tilde{n} $$ \log(\tilde{n})) $ in time and $ O(\tilde{n}) $ in space.
+Both \textit{bicriteria} and \textit{hybrid} concatenate all the posting lists into one to arrange encodings of each block, and are delayed by one time-consuming phase that cannot be paralleled, for \textit{bicriteria} is the iteration when solving the dual problem, for \textit{hybrid} is the sorting of $ \lambda_{i,j} $.
+
+However, in practice \textit{bicriteria} compresses more efficiently than \textit{hybrid}.
+The average time used on GOV2 is 22 minutes, and on Common Crawl is 50 minutes.
+In contrast \textit{hybrid} costs 30 and 71 minutes, respectively.
+Note that time complexity of the iteration is measured in the worst case scenario, in our experiment the algorithm converges rapidly after few iterations.
+We can further improve the compression efficiency by amortizing the expected budget over each posting list rather than concatenating all the posting lists together, at the cost of losing the approximation guarantee.
+However, we can calculate the optimal path and compress blocks for each posting list separately, namely the whole phases of \textit{bicriteria} can be accelerated by parallel.
+\begin{figure}
+	\centering
+	\subfloat[linearly varying space budget $ S $ from 0 to 1 by 0.1]{
+		\label{fig: cc_S}
+		\includegraphics[width=1.0\linewidth]{cc_S}
+	}\\
+	\subfloat[linearly varying time budget $ T $ from 1 to 0 by 0.1]{
+		\label{fig: cc_T}
+		\includegraphics[width=1.0\linewidth]{cc_T}
+	}
+	\caption{Percentage of encoders used when compressing blocks under different space/time budgets for Common Crawl, the abscissa represents compressed size in GB.}
+	\label{fig: percentage}
+\end{figure}
+\paragraph*{Trading off space and time}
+In order to demonstrate \textit{bicriteria} has the ability to flexibly trade off compressed size and query processing time, we perform two series of experiments by specifying space and time as budget respectively.
+Space budget is obviously the compressed size, we set the time budget as the sum of expected query processing time for all the queries in $ \cal Q $.
+The budget is represented using a compression level $ l = \frac{B-B_0}{B_\infty-B_0} $, where $ (B_0,B_\infty) $ is the minimum and maximum space/time the index can achieve.
+For example, if $ B = S $, then $ B_0 $ is the most succinct space optimal compression with $ l = 0 $, while $ B_\infty $ is the fastest compression with $ l = 1 $.
+
+As shown in Figure~\ref{fig: cc_S}, by linearly relaxing the budget in space, \textit{bicriteria} trends to choose more fast encoders.
+At first more than 90\% blocks are compressed using Interpolative, then more PFD-compressed blocks are involved and last nearly all of them are compressed using Varint-G8IU.
+The result agrees with that of \cite{ottaviano2015optimal}, however, their space-time curve is more smoothing because when the space budget changes, \textit{hybrid} executes a sequential scan to replace encoders right starting from the last block it stopped.
+\textit{Bicriteria} works in a more \textbf{balanced} way, the budget is amortized to all the blocks since it relies on path finding rather than sorting, while \textit{hybrid} is a \textbf{greedy} algorithm, it always prefer blocks which are more frequently accessed.
+
+Figure~\ref{fig: cc_T} shows how space changes when we linearly tightens time budget ($ T $ varies from 1 to 0).
+It is quite different from \ref{fig: cc_S} as Interpolative is the preferred choice in most cases, even when $ l = 0.5 $ there are still nearly 50\% blocks using Interpolative.
+This is caused by the fact that the average length of posting list in Common Crawl is 173.38, large number of partial blocks lead to the use of Interpolative.
+Also, Interpolative is much slower than other encoders, a small drop of its usage indeed leads to a much reduce in expected query processing time.
+Note that this kind of reduce is a balanced result, we have to admit that it does not work well most of the time in real scenario.
+However, we can use it to find the proper point where the average decoding time is sharply reduced while its space occupancy keeps low, for example, we can choose $ l=0.5 $ here.
+
+Table~\ref{tab: space and time} reports the indexing performances of \textit{bicriteria} under various budgets in comparison with \textit{hybrid}.
+Results are classified by ``method@[\textit{compression level}][\textit{budget type}]", space denotes the index size in gigabytes and time denotes the expected time cost in nanoseconds of decoding one 128-sized block.
+The expected time cost is obtained using $ \sum_{i=1}^{n}$ $x_{i,j}\hat{t}_{i,j} / \sum_{i=1}^{n}f_{i} $, taking into account of the impact of frequently accessed blocks.
+\begin{table*}
+	\centering
+	\caption{Comparison of construction time, and average bits per element of each componentmmmmmmmmmm}
+	\renewcommand{\arraystretch}{1.0}
+	\setlength\tabcolsep{6pt}
+	\begin{tabular}{@{}l*{3}{l*{2}{r}}}
+		\toprule
+		\multirow{2}*{Dataset} & \multirow{2}*{Method} & \multicolumn{1}{c}{Space} & \multicolumn{1}{c}{Time} & \multirow{2}*{Method} & \multicolumn{1}{c}{Space} & \multicolumn{1}{c}{Time} &\multirow{2}*{Method} & \multicolumn{1}{c}{Space} & \multicolumn{1}{c}{Time} \\
+		& &\multicolumn{1}{c}{\textbf{GB}} & \multicolumn{1}{c}{\textbf{ns}} & & \multicolumn{1}{c}{\textbf{GB}} & \multicolumn{1}{c}{\textbf{ns}} & & \multicolumn{1}{c}{\textbf{GB}} & \multicolumn{1}{c}{\textbf{ns}} \\
+		
+		\cmidrule(r){1-1} \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(l){8-10}
+		
+		\multirow{11}*{GOV2} 
+		& bicriteria@\textbf{0S}   & 3.05 & 3026 & hybrid@\textbf{0S}   & 3.05 & 3026 & bicriteria@\textbf{0T}   & 5.43 & 124 \\	
+		& bicriteria@\textbf{0.1S} & 3.28 & 1539 & hybrid@\textbf{0.1S} & 3.28 & 832  & bicriteria@\textbf{0.1T} & 3.67 & 413 \\
+		& bicriteria@\textbf{0.2S} & 3.53 & 727  & hybrid@\textbf{0.2S} & 3.53 & 389  & bicriteria@\textbf{0.2T} & 3.55 & 700 \\
+		& bicriteria@\textbf{0.3S} & 3.77 & 297  & hybrid@\textbf{0.3S} & 3.77 & 203  & bicriteria@\textbf{0.3T} & 3.45 & 990 \\
+		& bicriteria@\textbf{0.4S} & 4.00 & 202  & hybrid@\textbf{0.4S} & 4.00 & 153  & bicriteria@\textbf{0.4T} & 3.37 & 1278 \\
+		& bicriteria@\textbf{0.5S} & 4.24 & 165  & hybrid@\textbf{0.5S} & 4.24 & 136  & bicriteria@\textbf{0.5T} & 3.30 & 1566 \\
+		& bicriteria@\textbf{0.6S} & 4.48 & 145  & hybrid@\textbf{0.6S} & 4.48 & 129  & bicriteria@\textbf{0.6T} & 3.23 & 1857 \\
+		& bicriteria@\textbf{0.7S} & 4.72 & 135  & hybrid@\textbf{0.7S} & 4.72 & 126  & bicriteria@\textbf{0.7T} & 3.18 & 2147 \\
+		& bicriteria@\textbf{0.8S} & 4.95 & 129  & hybrid@\textbf{0.8S} & 4.95 & 125  & bicriteria@\textbf{0.8T} & 3.12 & 2430 \\
+		& bicriteria@\textbf{0.9S} & 5.19 & 126  & hybrid@\textbf{0.9S} & 5.19 & 125  & bicriteria@\textbf{0.9T} & 3.08 & 2719 \\
+		& bicriteria@\textbf{1S}   & 5.43 & 124  & hybrid@\textbf{1S}   & 5.43 & 124  & bicriteria@\textbf{1T}   & 3.05 & 3026 \\
+		\midrule
+		\multirow{11}*{Common Crawl} 
+		& bicriteria@\textbf{0S}   & 9.38  & 3559 & hybrid@\textbf{0S}   & 9.38  & 3559 & bicriteria@\textbf{0T}   & 16.14  & 124 \\	
+		& bicriteria@\textbf{0.1S} & 10.06 & 1892 & hybrid@\textbf{0.1S} & 10.06 & 867  & bicriteria@\textbf{0.1T} & 11.48  & 466 \\
+		& bicriteria@\textbf{0.2S} & 10.73 & 828  & hybrid@\textbf{0.2S} & 10.73 & 348  & bicriteria@\textbf{0.2T} & 10.98  & 854 \\
+		& bicriteria@\textbf{0.3S} & 11.41 & 354  & hybrid@\textbf{0.3S} & 11.41 & 185  & bicriteria@\textbf{0.3T} & 10.69  & 1151 \\
+		& bicriteria@\textbf{0.4S} & 12.09 & 233  & hybrid@\textbf{0.4S} & 12.09 & 144  & bicriteria@\textbf{0.4T} & 10.43  & 1493 \\
+		& bicriteria@\textbf{0.5S} & 12.76 & 182  & hybrid@\textbf{0.5S} & 12.76 & 131  & bicriteria@\textbf{0.5T} & 10.20  & 1933 \\
+		& bicriteria@\textbf{0.6S} & 13.44 & 155  & hybrid@\textbf{0.6S} & 13.44 & 127  & bicriteria@\textbf{0.6T} & 9.98   & 2180 \\
+		& bicriteria@\textbf{0.7S} & 14.11 & 139  & hybrid@\textbf{0.7S} & 14.11 & 126  & bicriteria@\textbf{0.7T} & 9.80   & 2522 \\
+		& bicriteria@\textbf{0.8S} & 14.79 & 131  & hybrid@\textbf{0.8S} & 14.79 & 125  & bicriteria@\textbf{0.8T} & 9.64   & 2839 \\
+		& bicriteria@\textbf{0.9S} & 15.46 & 126  & hybrid@\textbf{0.9S} & 15.46 & 124  & bicriteria@\textbf{0.9T} & 9.50   & 3207 \\
+		& bicriteria@\textbf{1S}   & 16.14 & 124  & hybrid@\textbf{1S}   & 16.14 & 124  & bicriteria@\textbf{1T}   & 9.38   & 3559 \\
+
+		\bottomrule
+		\label{tab: space and time}
+	\end{tabular}
+\end{table*}
+
+Generally, \textit{bicriteria} is able to find the exact solution under different budgets.
+As shown in the first two columns of the table, \textit{bicriteria} achieve the same space as that of \textit{hybrid} on both GOV2 and Common Crawl.
+However, the expected time costs they got are quite different from each other.
+We can see that \textit{hybrid} always have smaller cost than \textit{bicriteria}, except under two extreme cases where they all adopt the same optimal solution.
+Also, the cost got by \textit{hybrid} drops sharply as the space budget grows while \textit{bicriteria} changes relatively slow.
+Note this phenomenon is caused by the internal mechanism of two different methods.
+Given extra space, \textit{hybrid} will update the most frequently accessed blocks of the remaining ones, this will have a direct effect on the decrease of expected time.
+However, \textit{bicriteria} tries to share the space to as more blocks as possible, because when we generate a path in the first phase, the edge-selection for each block is independent.
+Thus resulting a larger average cost than \textit{hybrid}.
+
+The result is also consistent with the percentage shown in Figure~\ref{fig: cc_S}.
+Compared with \textit{hybrid}, \textit{bicriteria} uses more Interpolative at first.
+And in the middle of the figure, PFD accounts for a larger proportion than that of \textit{hybrid}.
+In a word, our method focuses on improving the average performance of query processing while \textit{hybrid} focuses on guaranteeing performance of the most frequently used queries.
+
+The third column reports result of \textit{bicriteria} using time as budget.
+The space slowly grows as we relax the time budget from 1 to 0.1, because 10\% growth in space can sharply reduce the expected time cost.
+Also, the expected time cost can hardly be satisfied since it is an averaged value, from Figure~\ref{fig: cc_T} we can see most of the blocks are compressed using Interpolative.
+A subdivision between 0T and 0.1T can be used to find more practical tradeoffs, but there needs a careful measurement of the connection between the expected time budget and actual query processing time. 
+
+\subsection{Query Efficiency}
+
+In order to explore the efficiency differences between \textit{bicriteria} and \textit{hybrid}, we adopt three widely-used methods of ranked query to find the top-20 results, Ranked\_AND, WAND and Maxscore.
+Due to the limited space, we only report partial result (the space budget grows from 0 to 1 by 0.2) on Common Crawl, the omitted part and result on GOV2 exhibit similar performance except that query time on GOV2 gets an overall decline because of smaller index size.
+We also omit performances of single encoders, as our goal is only to prove that \textit{bicriteria} obtains a better average processing time in practice with the help of a more balanced selection of encoders.
+
+As shown in Figure~\ref{fig: query}, we can see that both the methods get similar query efficiency under various scenarios.
+Even though Table~\ref{tab: space and time} reports \textit{hybrid} has a smaller expected processing time, practical experiment shows a quite different result, \textit{bicriteria} works better in some cases.
+Among all three processing strategies, the most evident performance gap occurs in Ranked\_AND, we can see at smaller budget (0.2S and 0.4S), the average time of \textit{bicriteria} is smaller than \textit{hybrid}.
+This is due to the fact that \textit{hybrid} prefers optimizing those frequently accessed blocks inside the whole index, if one posting list has few this kind of blocks or the entire list is rarely accessed, then the processing time will be extended because of too many ``slow" blocks.
+However, encoders assigned to blocks using \textit{bicriteria} is more evenly distributed. 
+As Ranked\_AND processes queries by traversing all the blocks inside the posting lists, the difference is more apparent.
+We can also find gaps caused by WAND and MaxScore are less vulnerable to this problem because these two strategies are more likely to decode those frequently accessed blocks.
+
+Another noticeable phenomenon is performance gaps get blurred when the budget grows larger.
+The reasons are twofold.
+First, both methods adopt more fast encoders, the different blocks begin to reduce.
+Second, limited timing accuracy makes it harder to compare these slight differences.
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{query}
+	\caption{Query time distribution of \textit{bicriteria} and \textit{hybrid} using different processing strategies on Common Crawl, the budget varies from 0 to 1. The average query time is represented by plus sign.}
+	\label{fig: query}
+\end{figure}
 
 \section{Conclusions and Future Work}
+In this paper we have introduced a bicriteria optimization on building hybrid index.
+Compared with its original version, our method is also able to yield a flexible space-time tradeoff under a given budget, while preserving the same additive approximation guarantees.
+Moreover, it supports regarding either time or space as budget and is possible to be extended using variable-sized blocks.
+Our method is more theoretically well-founded, we have given detailed proof of its smaller space and time complexity, also the experiment has demonstrated \textit{bicriteria} gains smaller construction time and average query processing time.
 
-%HERE
-%\section{The {\secit Body} of The Paper}
-%Typically, the body of a paper is organized
-%into a hierarchical structure, with numbered or unnumbered
-%headings for sections, subsections, sub-subsections, and even
-%smaller sections.  The command \texttt{{\char'134}section} that
-%precedes this paragraph is part of such a
-%hierarchy.\footnote{This is the second footnote.  It
-%starts a series of three footnotes that add nothing
-%informational, but just give an idea of how footnotes work
-%and look. It is a wordy one, just so you see
-%how a longish one plays out.} \LaTeX\ handles the numbering
-%and placement of these headings for you, when you use
-%the appropriate heading commands around the titles
-%of the headings.  If you want a sub-subsection or
-%smaller part to be unnumbered in your output, simply append an
-%asterisk to the command name.  Examples of both
-%numbered and unnumbered headings will appear throughout the
-%balance of this sample document.
-%
-%Because the entire article is contained in
-%the \textbf{document} environment, you can indicate the
-%start of a new paragraph with a blank line in your
-%input file; that is why this sentence forms a separate paragraph.
-%
-%\subsection{Type Changes and {\subsecit Special} Characters}
-%We have already seen several typeface changes in this sample.  You
-%can indicate italicized words or phrases in your text with
-%the command \texttt{{\char'134}textit}; emboldening with the
-%command \texttt{{\char'134}textbf}
-%and typewriter-style (for instance, for computer code) with
-%\texttt{{\char'134}texttt}.  But remember, you do not
-%have to indicate typestyle changes when such changes are
-%part of the \textit{structural} elements of your
-%article; for instance, the heading of this subsection will
-%be in a sans serif\footnote{A third footnote, here.
-%Let's make this a rather short one to
-%see how it looks.} typeface, but that is handled by the
-%document class file. Take care with the use
-%of\footnote{A fourth, and last, footnote.}
-%the curly braces in typeface changes; they mark
-%the beginning and end of
-%the text that is to be in the different typeface.
-%
-%You can use whatever symbols, accented characters, or
-%non-English characters you need anywhere in your document;
-%you can find a complete list of what is
-%available in the \textit{\LaTeX\
-%User's Guide}.
-%
-%\subsection{Math Equations}
-%You may want to display math equations in three distinct styles:
-%inline, numbered or non-numbered display.  Each of
-%the three are discussed in the next sections.
-%
-%\subsubsection{Inline (In-text) Equations}
-%A formula that appears in the running text is called an
-%inline or in-text formula.  It is produced by the
-%\textbf{math} environment, which can be
-%invoked with the usual \texttt{{\char'134}begin. . .{\char'134}end}
-%construction or with the short form \texttt{\$. . .\$}. You
-%can use any of the symbols and structures,
-%from $\alpha$ to $\omega$, available in
-%\LaTeX; this section will simply show a
-%few examples of in-text equations in context. Notice how
-%this equation: \begin{math}\lim_{n\rightarrow \infty}x=0\end{math},
-%set here in in-line math style, looks slightly different when
-%set in display style.  (See next section).
-%
-%\subsubsection{Display Equations}
-%A numbered display equation -- one set off by vertical space
-%from the text and centered horizontally -- is produced
-%by the \textbf{equation} environment. An unnumbered display
-%equation is produced by the \textbf{displaymath} environment.
-%
-%Again, in either environment, you can use any of the symbols
-%and structures available in \LaTeX; this section will just
-%give a couple of examples of display equations in context.
-%First, consider the equation, shown as an inline equation above:
-%\begin{equation}\lim_{n\rightarrow \infty}x=0\end{equation}
-%Notice how it is formatted somewhat differently in
-%the \textbf{displaymath}
-%environment.  Now, we'll enter an unnumbered equation:
-%\begin{displaymath}\sum_{i=0}^{\infty} x + 1\end{displaymath}
-%and follow it with another numbered equation:
-%\begin{equation}\sum_{i=0}^{\infty}x_i=\int_{0}^{\pi+2} f\end{equation}
-%just to demonstrate \LaTeX's able handling of numbering.
-%
-%\subsection{Citations}
-%Citations to articles,
-%conference proceedings or
-%books listed
-%in the Bibliography section of your
-%article will occur throughout the text of your article.
-%You should use BibTeX to automatically produce this bibliography;
-%you simply need to insert one of several citation commands with
-%a key of the item cited in the proper location in
-%the \texttt{.tex} file .
-%The key is a short reference you invent to uniquely
-%identify each work; in this sample document, the key is
-%the first author's surname and a
-%word from the title.  This identifying key is included
-%with each item in the \texttt{.bib} file for your article.
-%
-%The details of the construction of the \texttt{.bib} file
-%are beyond the scope of this sample document, but more
-%information can be found in the \textit{Author's Guide},
-%and exhaustive details in the \textit{\LaTeX\ User's
-%Guide}.
-%
-%This article shows only the plainest form
-%of the citation command, using \texttt{{\char'134}cite}.
-%This is what is stipulated in the SIGS style specifications.
-%No other citation format is endorsed or supported.
-%
-%\subsection{Tables}
-%Because tables cannot be split across pages, the best
-%placement for them is typically the top of the page
-%nearest their initial cite.  To
-%ensure this proper ``floating'' placement of tables, use the
-%environment \textbf{table} to enclose the table's contents and
-%the table caption.  The contents of the table itself must go
-%in the \textbf{tabular} environment, to
-%be aligned properly in rows and columns, with the desired
-%horizontal and vertical rules.  Again, detailed instructions
-%on \textbf{tabular} material
-%is found in the \textit{\LaTeX\ User's Guide}.
-%
-%Immediately following this sentence is the point at which
-%Table 1 is included in the input file; compare the
-%placement of the table here with the table in the printed
-%dvi output of this document.
-%
-%\begin{table}
-%\centering
-%\caption{Frequency of Special Characters}
-%\begin{tabular}{|c|c|l|} \hline
-%Non-English or Math&Frequency&Comments\\ \hline
-%\O & 1 in 1,000& For Swedish names\\ \hline
-%$\pi$ & 1 in 5& Common in math\\ \hline
-%\$ & 4 in 5 & Used in business\\ \hline
-%$\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
-%\hline\end{tabular}
-%\end{table}
-%
-%To set a wider table, which takes up the whole width of
-%the page's live area, use the environment
-%\textbf{table*} to enclose the table's contents and
-%the table caption.  As with a single-column table, this wide
-%table will ``float" to a location deemed more desirable.
-%Immediately following this sentence is the point at which
-%Table 2 is included in the input file; again, it is
-%instructive to compare the placement of the
-%table here with the table in the printed dvi
-%output of this document.
-%
-%
-%\begin{table*}
-%\centering
-%\caption{Some Typical Commands}
-%\begin{tabular}{|c|c|l|} \hline
-%Command&A Number&Comments\\ \hline
-%\texttt{{\char'134}alignauthor} & 100& Author alignment\\ \hline
-%\texttt{{\char'134}numberofauthors}& 200& Author enumeration\\ \hline
-%\texttt{{\char'134}table}& 300 & For tables\\ \hline
-%\texttt{{\char'134}table*}& 400& For wider tables\\ \hline\end{tabular}
-%\end{table*}
-%% end the environment with {table*}, NOTE not {table}!
-%
-%\subsection{Figures}
-%Like tables, figures cannot be split across pages; the
-%best placement for them
-%is typically the top or the bottom of the page nearest
-%their initial cite.  To ensure this proper ``floating'' placement
-%of figures, use the environment
-%\textbf{figure} to enclose the figure and its caption.
-%
-%This sample document contains examples of \textbf{.eps} files to be
-%displayable with \LaTeX.  If you work with pdf\LaTeX, use files in the
-%\textbf{.pdf} format.  Note that most modern \TeX\ system will convert
-%\textbf{.eps} to \textbf{.pdf} for you on the fly.  More details on
-%each of these is found in the \textit{Author's Guide}.
-%
-%\begin{figure}
-%\centering
-%\includegraphics{fly}
-%\caption{A sample black and white graphic.}
-%\end{figure}
-%
-%\begin{figure}
-%\centering
-%\includegraphics[height=1in, width=1in]{fly}
-%\caption{A sample black and white graphic
-%that has been resized with the \texttt{includegraphics} command.}
-%\end{figure}
-%
-%
-%As was the case with tables, you may want a figure
-%that spans two columns.  To do this, and still to
-%ensure proper ``floating'' placement of tables, use the environment
-%\textbf{figure*} to enclose the figure and its caption.
-%and don't forget to end the environment with
-%{figure*}, not {figure}!
-%
-%\begin{figure*}
-%\centering
-%\includegraphics{flies}
-%\caption{A sample black and white graphic
-%that needs to span two columns of text.}
-%\end{figure*}
-%
-%
-%\begin{figure}
-%\centering
-%\includegraphics[height=1in, width=1in]{rosette}
-%\caption{A sample black and white graphic that has
-%been resized with the \texttt{includegraphics} command.}
-%\vskip -6pt
-%\end{figure}
-%
-%\subsection{Theorem-like Constructs}
-%Other common constructs that may occur in your article are
-%the forms for logical constructs like theorems, axioms,
-%corollaries and proofs.  There are
-%two forms, one produced by the
-%command \texttt{{\char'134}newtheorem} and the
-%other by the command \texttt{{\char'134}newdef}; perhaps
-%the clearest and easiest way to distinguish them is
-%to compare the two in the output of this sample document:
-%
-%This uses the \textbf{theorem} environment, created by
-%the\linebreak\texttt{{\char'134}newtheorem} command:
-%%\newtheorem{theorem}{Theorem}
-%\begin{theorem}
-%Let $f$ be continuous on $[a,b]$.  If $G$ is
-%an antiderivative for $f$ on $[a,b]$, then
-%\begin{displaymath}\int^b_af(t)dt = G(b) - G(a).\end{displaymath}
-%\end{theorem}
-%
-%The other uses the \textbf{definition} environment, created
-%by the \texttt{{\char'134}newdef} command:
-%\newdef{definition}{Definition}
-%\begin{definition}
-%If $z$ is irrational, then by $e^z$ we mean the
-%unique number which has
-%logarithm $z$: \begin{displaymath}{\log e^z = z}\end{displaymath}
-%\end{definition}
-%
-%Two lists of constructs that use one of these
-%forms is given in the
-%\textit{Author's  Guidelines}.
-% 
-%There is one other similar construct environment, which is
-%already set up
-%for you; i.e. you must \textit{not} use
-%a \texttt{{\char'134}newdef} command to
-%create it: the \textbf{proof} environment.  Here
-%is a example of its use:
-%\begin{proof}
-%Suppose on the contrary there exists a real number $L$ such that
-%\begin{displaymath}
-%\lim_{x\rightarrow\infty} \frac{f(x)}{g(x)} = L.
-%\end{displaymath}
-%Then
-%\begin{displaymath}
-%l=\lim_{x\rightarrow c} f(x)
-%= \lim_{x\rightarrow c}
-%\left[ g{x} \cdot \frac{f(x)}{g(x)} \right ]
-%= \lim_{x\rightarrow c} g(x) \cdot \lim_{x\rightarrow c}
-%\frac{f(x)}{g(x)} = 0\cdot L = 0,
-%\end{displaymath}
-%which contradicts our assumption that $l\neq 0$.
-%\end{proof}
-%
-%Complete rules about using these environments and using the
-%two different creation commands are in the
-%\textit{Author's Guide}; please consult it for more
-%detailed instructions.  If you need to use another construct,
-%not listed therein, which you want to have the same
-%formatting as the Theorem
-%or the Definition shown above,
-%use the \texttt{{\char'134}newtheorem} or the
-%\texttt{{\char'134}newdef} command,
-%respectively, to create it.
-%
-%\subsection*{A {\secit Caveat} for the \TeX\ Expert}
-%Because you have just been given permission to
-%use the \texttt{{\char'134}newdef} command to create a
-%new form, you might think you can
-%use \TeX's \texttt{{\char'134}def} to create a
-%new command: \textit{Please refrain from doing this!}
-%Remember that your \LaTeX\ source code is primarily intended
-%to create camera-ready copy, but may be converted
-%to other forms -- e.g. HTML. If you inadvertently omit
-%some or all of the \texttt{{\char'134}def}s recompilation will
-%be, to say the least, problematic.
-%
-%\section{Conclusions}
-%This paragraph will end the body of this sample document.
-%Remember that you might still have Acknowledgments or
-%Appendices; brief samples of these
-%follow.  There is still the Bibliography to deal with; and
-%we will make a disclaimer about that here: with the exception
-%of the reference to the \LaTeX\ book, the citations in
-%this paper are to articles which have nothing to
-%do with the present subject and are used as
-%examples only.
-%%\end{document}  % This is where a 'short' article might terminate
-%
-%%ACKNOWLEDGMENTS are optional
-%\section{Acknowledgments}
-%This section is optional; it is a location for you
-%to acknowledge grants, funding, editing assistance and
-%what have you.  In the present case, for example, the
-%authors would like to thank Gerald Murray of ACM for
-%his help in codifying this \textit{Author's Guide}
-%and the \textbf{.cls} and \textbf{.tex} files that it describes.
-%HERE
+Since our solution only focuses on modeling methodology rather than implementation, we do not consider integrating other encoders into the method.
+Also, there needs a better tuned measurement to connect expected budget and practical performance when using time as budget.
+Finally, it would be worthwhile to extend \textit{bicriteria} with variable-sized blocks.
 
-%
-% The following two commands are all you need in the
-% initial runs of your .tex file to
-% produce the bibliography for the citations in your paper.
 \bibliographystyle{abbrv}
-\bibliography{reference}  % sigproc.bib is the name of the Bibliography in this case
-% You must have a proper ".bib" file
-%  and remember to run:
-% latex bibtex latex latex
-% to resolve all references
-%
+\balance
+\bibliography{reference}
+
 % ACM needs 'a single self-contained file'!
 %
 %APPENDICES are optional
 %\balancecolumns
 
-%HERE
-%\appendix
-%%Appendix A
-%\section{Headings in Appendices}
-%The rules about hierarchical headings discussed above for
-%the body of the article are different in the appendices.
-%In the \textbf{appendix} environment, the command
-%\textbf{section} is used to
-%indicate the start of each Appendix, with alphabetic order
-%designation (i.e. the first is A, the second B, etc.) and
-%a title (if you include one).  So, if you need
-%hierarchical structure
-%\textit{within} an Appendix, start with \textbf{subsection} as the
-%highest level. Here is an outline of the body of this
-%document in Appendix-appropriate form:
-%\subsection{Introduction}
-%\subsection{The Body of the Paper}
-%\subsubsection{Type Changes and  Special Characters}
-%\subsubsection{Math Equations}
-%\paragraph{Inline (In-text) Equations}
-%\paragraph{Display Equations}
-%\subsubsection{Citations}
-%\subsubsection{Tables}
-%\subsubsection{Figures}
-%\subsubsection{Theorem-like Constructs}
-%\subsubsection*{A Caveat for the \TeX\ Expert}
-%\subsection{Conclusions}
-%\subsection{Acknowledgments}
-%\subsection{Additional Authors}
-%This section is inserted by \LaTeX; you do not insert it.
-%You just add the names and information in the
-%\texttt{{\char'134}additionalauthors} command at the start
-%of the document.
-%\subsection{References}
-%Generated by bibtex from your ~.bib file.  Run latex,
-%then bibtex, then latex twice (to resolve references)
-%to create the ~.bbl file.  Insert that ~.bbl file into
-%the .tex source file and comment out
-%the command \texttt{{\char'134}thebibliography}.
-%% This next section command marks the start of
-%% Appendix B, and does not continue the present hierarchy
-%\section{More Help for the Hardy}
-%The sig-alternate.cls file itself is chock-full of succinct
-%and helpful comments.  If you consider yourself a moderately
-%experienced to expert user of \LaTeX, you may find reading
-%it useful but please remember not to change it.
-%%\balancecolumns % GM June 2007
-%% That's all folks!
-%HERE
 \end{document}
