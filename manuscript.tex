@@ -217,8 +217,10 @@ To rank the documents in response to a query, the posting list for the terms of 
 There is a vast variety of literature study on structures and query processing strategies, see \cite{ding2011faster,konow2013faster,navarro2010dual} for a detailed survey.
 
 %Different orderings of the postings in the posting list change both the algorithm for ranked retrieval and the underlying representation of the postings in the inverted index.
-%Generally, there are two kinds of orderings, namely the docid-sorted and frequency-sorted, in docid-sorted index postings are sorted by docid in ascending order, allowing efficient compression and fast query processing; in frequency-sorted index postings are sorted by frequency in descending order and postings with same frequency are sorted by docid, an early termination can be reached for ranked query since the most promising postings are placed close to the start of the list.
-%A fatal problem with frequency-sorted index is that unordered docids are hard to compress, commercial search engines reportedly use the former obtain very good results by \cite{dimopoulos2013optimizing}.
+%Generally, there are two kinds of orderings, namely the docid-sorted and frequency-sorted.
+%In docid-sorted index postings are sorted by docid in ascending order, allowing efficient compression and fast query processing; in frequency-sorted index postings are sorted by frequency in descending order and postings with same frequency are sorted by docid.
+%An early termination can be reached for ranked query since the most promising postings are placed close to the start of the list.
+%A fatal problem with frequency-sorted index is that unordered docids are hard to compress, commercial search engines reportedly use the former obtain very good results by \cite{dean2009challenges,dimopoulos2013optimizing}.
 %The appropriate compression of docid-sorted index is the focus of our work.
 
 To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
@@ -242,6 +244,7 @@ And those posting lists are virtually concatenated into one large list to facili
 
 \subsection{Pareto-optimal Compression}
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
+
 Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
 Petri et al. \cite{petri2014score} describe an data structure combining pruned suffix tree and inverted index together to facilitate phrase-based ranking.
 Our work is similar to these efforts, namely applying bicriteria compression to inverted index.
@@ -286,13 +289,13 @@ Silvestri and Venturini introduce dynamic programming recurrence for VSEncoding 
 
 However, our version of DAG $ \cal G $ has quite different definitions.
 The above methods are designed to pursue space-optimal partitioning at all costs, without considering the decompression speed.
-Our goal is to find one pareto-optimal solution under predefined space/time budget, in the new graph, each edge will have attached two weights: a \textit{time weight}, that accounts for the time to decompress a block, and a \textit{space cost}, that accounts for the number of bits needed to store a block associated to that edge.
+Our goal is to find one pareto-optimal solution under predefined space/time budget, in the new graph, each edge will be attached with two weights: a \textit{time weight}, that accounts for the time to decompress a block, and a \textit{space cost}, that accounts for the number of bits needed to store a block associated to that edge.
 The most notable contrast in our $ \cal G $ lies in the blocks of constant-size, which determine edge have fixed start and end points.
 Between these points, there can be multiple edges to choose from due to the diversity of encoders.
 So the total number of edges are exactly $ k \cdot \lceil \dfrac{m}{128} \rceil $ rather than $ O(m^2) $.
 For every path $ \pi $ from node 1 to node $ m $, we use $ s(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}x_{i,j}s_{i,j} $ to represent the whole compressed size, where $ l= \lceil \dfrac{m}{128} \rceil$, $ x_{i,j} $ represents the choice of the encoder for block $ i $, and is 1 if the chosen encoder is $ j $ and 0 otherwise, $ s_{i,j} $ denotes the space cost of block $ i $ using encoder $ \mathcal{E}_j $.
 Accordingly, the total decompression time is set to be $ t(\pi) = \sum_{i=1}^{l}\sum_{j=1}^{k}t_{i,j} $.
-Thus we are able to rephrase the bicriteria compression problem into a Resource Constrained Shortest Path problem (RCSP) over the double weighted $ \cal G $, namely finding a path $ \pi $ whose decompression time $ s(\pi) < S $ while its compressed size $ t(\pi) $ minimized.
+Thus we are able to rephrase the bicriteria compression problem into a Resource Constrained Shortest Path problem (RCSP) over the double weighted $ \cal G $, namely finding a path $ \pi $ whose compressed size $ s(\pi) < S $ while its decompression time $ t(\pi) $ minimized.
 Symmetrically, we can also exchange the role of space/time resources, which asks minimal $ s(\pi) $ with $ t(\pi) < T $.
 For the sake of convenience, we will consider the first formulation only in the rest of the paper. 
 An example of two different DAGs is shown in Figure~\ref{fig: DAG}.
@@ -306,10 +309,10 @@ An example of two different DAGs is shown in Figure~\ref{fig: DAG}.
 \section{Modeling the Problem}\label{sec: model}
 %从这里想起来应该是把所有的posting list连接起来才对
 In order to formulate the bicriteria compression problem, we need firstly model the space occupancy and decompression time of each block.
-As stated in the Secion~\ref{sec: preliminaries}, we assume each posting list is split into blocks of fixed-size with a total number of $ n $, $ s_{i,j} $ is used to denote the compressed size of the \textit{i}th block encoded by the \textit{j}th encoder.
-It can be obtained by compressing blocks using all the encoders before processing.
+As stated in the Secion~\ref{sec: preliminaries}, we assume each posting list is split into blocks of fixed-size with a total number of $ n $.
+Its space cost $ s_{i,j} $ can be obtained by compressing blocks using all the encoders before processing.
 We follow \cite{ottaviano2015optimal} by setting $ T $ as the expected time to process queries from a given query set $ \cal Q $, and adopting the same model to predict the decompression time $ t_{i,j} $.
-Then $ T $ is closely related to query processing strategy used and the distribution in $ \cal Q $.
+Thus $ T $ is closely related to query processing strategy used and the distribution in $ \cal Q $.
 We set $ t(\pi) = \sum_{i=1}^{n}x_{i,j}\hat{t}_{i,j} $, where $ \hat{t}_{i,j}=f_i t_{i,j} $, $ f_i $ is the number of times the \textit{i}th block was decoded while processing $ \cal Q $.
 Also, $ f_i $ can be set to 1 if to measure the thorough decompression time of the index.
 
@@ -340,7 +343,7 @@ Let $ \pi $ be the path we find, and $ \pi^\star $ be the optimal path of the RC
 At the end of Section~\ref{sec: our alg}, we will have proved the following theorem:
 \newtheorem{theorem}{Theorem}
 \begin{theorem}
-	$ \pi $ can be computed in $ O(\log n) $ time and $ O(n) $ time with its time cost $ t(\pi) \leqslant f(\pi^\star) + t_{max} $ and space cost $ s(\pi) \leqslant S + 2s_{max} $.
+	$ \pi $ can be computed in $ O(\log n) $ time and $ O(n) $ time with its time cost $ t(\pi) \leqslant f(\pi^\star) + t_{max} $ and space cost $ s(\pi) \leqslant S + s_{max} $.
 \end{theorem}
 Here we use $ s_{max} $ and $ t_{max} $ to denote the maximum space/time cost of one block.
 
@@ -357,11 +360,11 @@ Thus we get an instantiation of $ \mu^\star $ corresponding to the maximal value
 In case one of the two path has its space cost $ s(\pi_r) = S $, then its time cost is the optimal one of $ t(\pi^\star) $.
 Unfortunately, this rarely occurs in practice and in most cases we have to tackle duality gap between $ \pi_l $ and $ \pi_r $.
 In the second phase, we will execute a sequential exchange of edges from both paths.
-After that, we will be able to get an optimal path whose time and space costs better approximate the budget.
+After that, we will be able to get an optimal path whose space cost better approximates the budget.
 
 \subsection{Solving the Dual Problem}
 This phase mainly contributes to the fusion of two extreme paths, one of which is space-optimal while the other one is time-optimal, thus making the fused path converges gradually to the given range through an finite iteration.
-The key step stays in generating the optimal path $ \pi' $ for $ \mu $ in each iteration.
+The key step lies in generating the optimal path $ \pi' $ for $ \mu $ in each iteration.
 
 Notice that in Equation~\eqref{equ: L(u,pi)} we have $ \mu \geqslant 0 $ and $ g(\pi) \leqslant 0 $, thus $ L(\mu,\pi) $ representing $ f(\pi) $ adding a negative number.
 As we are trying to find a minimal $ f(\pi) $, we get the following equation:
@@ -374,7 +377,7 @@ Therefore, an best lower bound for the optimal path in RCSP can be found by solv
 L^\star = L(\mu^\star) = \max_{\mu \geqslant 0} L(\mu) =\max_{\mu \geqslant 0} \min_{\pi \in \Pi} \left[ f(\pi) + \mu g(\pi) \right]
 \end{equation}
 
-Now the problem has been converted from searching for an optimal path to a linear programming calculating maximal $ L(\mu) $, where each path defines a feasible region.
+Now the problem has been converted from searching for an optimal path to a linear programming which calculates maximal $ L(\mu) $, where each path defines a feasible region.
 And our goal is find out the vertex which maximize $ L(\mu) $ from the convex hull defined by the intersection of paths.
 
 However, it is impossible to figure out the convex hull using traditional simplex method since there can be $ O(n^k) $ paths.
@@ -407,7 +410,7 @@ It is easy to prove that $ \pi(0) $ and $ \pi(\infty) $ are exactly time-optimal
 We start by setting $ (\pi(0),\pi(\infty)) $ as $ (\pi_l,\pi_r) $, each time we intersect them, we get the point $ \mu' = (f_l - f_r)/(g_r-g_l) $ and $ L'= f_l + \mu' g_l $.
 Then a new path $ \pi' $ is generated as $ L(\mu') $, if $ g(\pi') < 0 $, $ \pi_r $ will replaced by $ \pi' $ and vice versa.
 The procedure terminates when $ L(u') = L' $ or $ g(\pi') = 0 $.
-It has been shown the number of iterations is $ O(\log(n $$ s_{costs} $$ t_{costs})) $ \cite{mehlhorn2000resource}, where $ s_{costs} $ and $ t_{costs} $ represent the block space/time cost in integers, in our scenario these two are negligible constant since block size is fixed to 128.
+It has been shown the number of iterations is $ O(\log(n s_{costs} t_{costs})) $ \cite{mehlhorn2000resource}, where $ s_{costs} $ and $ t_{costs} $ represent the block space/time cost in integers, in our scenario these two are negligible constant since block size is fixed to 128.
 This procedure is illustrated in Figure~\ref{fig: intersection}.
 
 It remains to describe how to generate an $ \mu $-\textit{optimal} path $ \pi' $ given the point of intersection $ (\mu',L') $.
@@ -418,7 +421,7 @@ Thus we can break this problem into numerous subproblems of selecting proper enc
 Finally we can sum their space/time costs together without collision.
 Namely,
 \begin{equation*}
-L(\mu,\pi) = L(\sum_{i=1}^{n} e_i, \mu)=\sum_{i=1}^{n}L(e_i,\mu)
+L(\mu,\pi) = L(\mu, \sum_{i=1}^{n} e_i)=\sum_{i=1}^{n}L(\mu, e_i)
 \end{equation*}
 Here $ e_i $ denotes edges in path $ \pi $.
 
@@ -476,12 +479,12 @@ In special, we would like to compare its efficiency and compression effectivenes
 
 \subsection{Experimental Setup}
 We choose the same encoder set $ \cal E $ used in \cite{ottaviano2015optimal}, namely Interpolative, PFD(\textit{h}) and Varint-G8IU.
-Here \textit{h} stands for exception bit length, and different \textit{h} are treated as different encoders.
+Here \textit{h} stands for exception bit length, and PFDs with different \textit{h} are treated as different encoders.
 Blocks with less than 128 postings are always compressed by Interpolative.
 
 We use the posting lists extracted from the following two collections: \textbf{TREC GOV2} and \textbf{Common Crawl}.
 TREC GOV2 is a crawl of the \textbf{.gov} sites used in TREC 2004 Terabyte Track, which consists of 25.2 million documents and 15.3 million terms.
-Common Crawl is a corpus of web crawl data composed of over 5 billion web pages over last 7 years, and it keeps growing until now.
+Common Crawl is a corpus of web crawl data composed of over 5 billion web pages over last 7 years, and it keeps growing till now.
 The crawl data is stored using WARC 1.0 format with about 541 TB in size.
 This whole collection is freely available on Amazon S3\footnote{\url{http://commoncrawl.org/}}. 
 
@@ -509,7 +512,7 @@ Table~\ref{tab: collection statistics} compares these two collections using some
 	\end{tabular}
 \end{table}
 
-We can find the trend that document length grows with age, making documents involved in more posting lists.
+In Table~\ref{tab: collection statistics}, we can find the trend that document length grows with age, making documents involved in more posting lists.
 However, Common Crawl is less organized than GOV2, since the former is collected from the whole web while the latter is limited in \texttt{.gov} domain, then terms in GOV2 are more repetitive and posting list length is larger.
 Next we will reveal how these differences affect performances of index.
 
@@ -532,7 +535,18 @@ The average time used on GOV2 is 22 minutes, and on Common Crawl is 50 minutes.
 In contrast \textit{hybrid} costs 30 and 71 minutes, respectively.
 Note that time complexity of the iteration is measured in the worst case scenario, in our experiment the algorithm converges rapidly after few iterations.
 We can further improve the compression efficiency by amortizing the expected budget over each posting list rather than concatenating all the posting lists together, at the cost of losing the approximation guarantee.
-However, we can calculate the optimal path and compress blocks for each posting list separately, namely the whole phases of \textit{bicriteria} can be accelerated by parallel.
+Then we can calculate the optimal path and compress blocks for each posting list separately, and the whole phases of \textit{bicriteria} can be accelerated by parallel.
+
+\paragraph*{Trading off space and time}
+In order to demonstrate \textit{bicriteria} has the ability to flexibly trade off compressed size and query processing time, we perform two series of experiments by specifying space and time as budget respectively.
+Space budget is obviously the compressed size, we set the time budget as the sum of expected query processing time for all the queries in $ \cal Q $.
+The budget is represented using a compression level $ l = \frac{B-B_0}{B_\infty-B_0} $, where $ (B_0,B_\infty) $ is the minimum and maximum space/time the index can achieve.
+For example, if $ B = S $, then $ B_0 $ is the most succinct space optimal compression with $ l = 0 $, while $ B_\infty $ is the fastest compression with $ l = 1 $.
+
+As shown in Figure~\ref{fig: cc_S}, by linearly relaxing the budget in space, \textit{bicriteria} trends to choose more fast encoders.
+At first more than 90\% blocks are compressed using Interpolative, then more PFD-compressed blocks are involved and last nearly all of them are compressed using Varint-G8IU.
+The result agrees with that of \cite{ottaviano2015optimal}, however, their space-time curve is more smoothing because when the space budget changes, \textit{hybrid} executes a sequential scan to replace encoders right starting from the last block it stopped.
+\textit{Bicriteria} works in a more \textbf{balanced} way, the budget is amortized to all the blocks since it relies on path finding rather than sorting, while \textit{hybrid} is a \textbf{greedy} algorithm, it always prefer blocks which are more frequently accessed.
 \begin{figure}
 	\centering
 	\subfloat[linearly varying space budget $ S $ from 0 to 1 by 0.1]{
@@ -546,27 +560,18 @@ However, we can calculate the optimal path and compress blocks for each posting 
 	\caption{Percentage of encoders used when compressing blocks under different space/time budgets for Common Crawl, the abscissa represents compressed size in GB.}
 	\label{fig: percentage}
 \end{figure}
-\paragraph*{Trading off space and time}
-In order to demonstrate \textit{bicriteria} has the ability to flexibly trade off compressed size and query processing time, we perform two series of experiments by specifying space and time as budget respectively.
-Space budget is obviously the compressed size, we set the time budget as the sum of expected query processing time for all the queries in $ \cal Q $.
-The budget is represented using a compression level $ l = \frac{B-B_0}{B_\infty-B_0} $, where $ (B_0,B_\infty) $ is the minimum and maximum space/time the index can achieve.
-For example, if $ B = S $, then $ B_0 $ is the most succinct space optimal compression with $ l = 0 $, while $ B_\infty $ is the fastest compression with $ l = 1 $.
-
-As shown in Figure~\ref{fig: cc_S}, by linearly relaxing the budget in space, \textit{bicriteria} trends to choose more fast encoders.
-At first more than 90\% blocks are compressed using Interpolative, then more PFD-compressed blocks are involved and last nearly all of them are compressed using Varint-G8IU.
-The result agrees with that of \cite{ottaviano2015optimal}, however, their space-time curve is more smoothing because when the space budget changes, \textit{hybrid} executes a sequential scan to replace encoders right starting from the last block it stopped.
-\textit{Bicriteria} works in a more \textbf{balanced} way, the budget is amortized to all the blocks since it relies on path finding rather than sorting, while \textit{hybrid} is a \textbf{greedy} algorithm, it always prefer blocks which are more frequently accessed.
 
 Figure~\ref{fig: cc_T} shows how space changes when we linearly tightens time budget ($ T $ varies from 1 to 0).
 It is quite different from \ref{fig: cc_S} as Interpolative is the preferred choice in most cases, even when $ l = 0.5 $ there are still nearly 50\% blocks using Interpolative.
 This is caused by the fact that the average length of posting list in Common Crawl is 173.38, large number of partial blocks lead to the use of Interpolative.
-Also, Interpolative is much slower than other encoders, a small drop of its usage indeed leads to a much reduce in expected query processing time.
+Also, Interpolative is much slower than other encoders, a small drop of its usage leads to a much reduce in expected query processing time.
 Note that this kind of reduce is a balanced result, we have to admit that it does not work well most of the time in real scenario.
-However, we can use it to find the proper point where the average decoding time is sharply reduced while its space occupancy keeps low, for example, we can choose $ l=0.5 $ here.
+However, we can use it to find the proper point where the average decoding time is sharply reduced while its space occupancy keeps low.
+For example, we can choose $ l=0.5 $ in expectation of a 50\% drop in query time with only a 11\% rise in size.
 
 Table~\ref{tab: space and time} reports the indexing performances of \textit{bicriteria} under various budgets in comparison with \textit{hybrid}.
 Results are classified by ``method@[\textit{compression level}][\textit{budget type}]", space denotes the index size in gigabytes and time denotes the expected time cost in nanoseconds of decoding one 128-sized block.
-The expected time cost is obtained using $ \sum_{i=1}^{n}$ $ x_{i,j}\hat{t}_{i,j} / \sum_{i=1}^{n}f_{i} $, taking into account of the impact of frequently accessed blocks.
+The expected time cost is obtained using $ \sum_{i=1}^{n} $ $ x_{i,j}\hat{t}_{i,j} / \sum_{i=1}^{n}f_{i} $, taking into account of the impact of frequently accessed blocks.
 \begin{table*}
 	\centering
 	\caption{Comparison of index size in gigabytes and expected average decoding time per block in nanoseconds of \textit{bicriteria} and \textit{hybrid} under various budgets on GOV2 and Common Crawl.}
@@ -611,12 +616,12 @@ The expected time cost is obtained using $ \sum_{i=1}^{n}$ $ x_{i,j}\hat{t}_{i,j
 \end{table*}
 
 Generally, \textit{bicriteria} is able to find the exact solution under different budgets.
-As shown in the first two columns of the table, \textit{bicriteria} achieve the same space as that of \textit{hybrid} on both GOV2 and Common Crawl.
-However, the expected time costs they got are quite different from each other.
-We can see that \textit{hybrid} always have smaller cost than \textit{bicriteria}, except under two extreme cases where they all adopt the same optimal solution.
+As shown in the first two columns of the table, \textit{bicriteria} achieves the same space as that of \textit{hybrid} on both GOV2 and Common Crawl.
+However, the expected time costs they get are quite different from each other.
+We can see that \textit{hybrid} always has smaller cost than \textit{bicriteria}, except under two extreme cases where they all adopt the same optimal solution.
 Also, the cost got by \textit{hybrid} drops sharply as the space budget grows while \textit{bicriteria} changes relatively slow.
 Note this phenomenon is caused by the internal mechanism of two different methods.
-Given extra space, \textit{hybrid} will update the most frequently accessed blocks of the remaining ones, this will have a direct effect on the decrease of expected time.
+Given extra space, \textit{hybrid} prefers to update the most frequently accessed blocks of the remaining ones, this will have a direct effect on the decrease of expected time.
 However, \textit{bicriteria} tries to share the space to as more blocks as possible, because when we generate a path in the first phase, the edge-selection for each block is independent.
 Thus resulting a larger average cost than \textit{hybrid}.
 
@@ -631,23 +636,17 @@ Also, the expected time cost can hardly be satisfied since it is an averaged val
 A subdivision between 0T and 0.1T can be used to find more practical tradeoffs, but there needs a careful measurement of the connection between the expected time budget and actual query processing time. 
 
 \subsection{Query Efficiency}
-
-In order to explore the efficiency differences between \textit{bicriteria} and \textit{hybrid}, we adopt three widely-used methods of ranked query to find the top-20 results, Ranked\_AND, WAND and Maxscore.
+In order to explore the efficiency differences between \textit{bicriteria} and \textit{hybrid}, we adopt three widely-used methods of ranked query to find the top-20 results, Ranked AND, WAND and Maxscore.
 Due to the limited space, we only report partial result (the space budget grows from 0 to 1 by 0.2) on Common Crawl, the omitted part and result on GOV2 exhibit similar performance except that query time on GOV2 gets an overall decline because of smaller index size.
-We also omit performances of single encoders, as our goal is only to prove that \textit{bicriteria} obtains a better average processing time in practice with the help of a more balanced selection of encoders.
+We also omit performances of single encoders, as our goal is only to prove that \textit{bicriteria} obtains a better average processing time in practice than \textit{hybrid} with the help of a more balanced selection of encoders.
 
 As shown in Figure~\ref{fig: query}, we can see that both the methods get similar query efficiency under various scenarios.
 Even though Table~\ref{tab: space and time} reports \textit{hybrid} has a smaller expected processing time, practical experiment shows a quite different result, \textit{bicriteria} works better in some cases.
-Among all three processing strategies, the most evident performance gap occurs in Ranked\_AND, we can see at smaller budget (0.2S and 0.4S), the average time of \textit{bicriteria} is smaller than \textit{hybrid}.
+Among all three processing strategies, the most evident performance gap occurs in Ranked AND, we can see at smaller budget (0.2S and 0.4S), the average time of \textit{bicriteria} is smaller than \textit{hybrid}.
 This is due to the fact that \textit{hybrid} prefers optimizing those frequently accessed blocks inside the whole index, if one posting list has few this kind of blocks or the entire list is rarely accessed, then the processing time will be extended because of too many ``slow" blocks.
 However, encoders assigned to blocks using \textit{bicriteria} is more evenly distributed. 
-As Ranked\_AND processes queries by traversing all the blocks inside the posting lists, the difference is more apparent.
+As Ranked AND processes queries by traversing all the blocks inside the posting lists, the difference is more apparent.
 We can also find gaps caused by WAND and MaxScore are less vulnerable to this problem because these two strategies are more likely to decode those frequently accessed blocks.
-
-Another noticeable phenomenon is performance gaps get blurred when the budget grows larger.
-The reasons are twofold.
-First, both methods adopt more fast encoders, the different blocks begin to reduce.
-Second, limited timing accuracy makes it harder to compare these slight differences.
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{query}
@@ -655,11 +654,20 @@ Second, limited timing accuracy makes it harder to compare these slight differen
 	\label{fig: query}
 \end{figure}
 
+Another noticeable phenomenon is performance gaps get blurred when the budget grows larger.
+The reasons can be twofold.
+First, both methods adopt more proportion of fast encoders, the different blocks begin to reduce.
+Second, limited timing accuracy makes it harder to compare these slight differences.
+It is also worth mentioning that \textit{bicriteria} behaves in accordance with what is reported in Table~\ref{tab: space and time} when using time as budget.
+However, its performance is always less effective than expected since its goal is to find the minimal index size that satisfies time budget.
+The result relies heavily on the accuracy of decoding prediction algorithms.
+Generally we can alleviate this problem by tightening the budget.
+
 \section{Conclusions and Future Work}
 In this paper we have introduced a bicriteria optimization on building hybrid index.
 Compared with its original version, our method is also able to yield a flexible space-time tradeoff under a given budget, while preserving the same additive approximation guarantees.
 Moreover, it supports regarding either time or space as budget and is possible to be extended using variable-sized blocks.
-Our method is more theoretically well-founded, we have given detailed proof of its smaller space and time complexity, also the experiment has demonstrated \textit{bicriteria} gains smaller construction time and average query processing time.
+Our method is more theoretically well-founded, and the experiment has demonstrated \textit{bicriteria} gains smaller construction time and average query processing time.
 
 Since our solution only focuses on modeling methodology rather than implementation, we do not consider integrating other encoders into the method.
 Also, there needs a better tuned measurement to connect expected budget and practical performance when using time as budget.
