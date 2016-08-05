@@ -48,6 +48,7 @@
 \documentclass{sig-alternate-05-2015}
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{amsmath,amssymb}
+\usepackage{cite}
 \usepackage{multirow,booktabs,makecell,color,colortbl}
 \usepackage{color}
 \usepackage{balance}
@@ -221,7 +222,7 @@ There is a vast variety of literature study on structures and query processing s
 %The appropriate compression of docid-sorted index is the focus of our work.
 
 To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
-Hence, the task of index compression is best viewed code sequences of integers of the form $x_{1},x_{2},x_{3},\ldots,x_{n}$ where $x_{i}\geqslant0$ for all $1\leqslant i\leqslant n$, and $n\geqslant1$ is the length of the sequence (\cite{anh2010index}).
+Hence, the task of index compression is best viewed code sequences of integers of the form $ x_{1},x_{2},x_{3},\ldots,x_{m} $ where $ x_{i}\geqslant0 $ for all $ 1\leqslant i\leqslant m $, and $ m $ is the number of the postings.
 
 Index compression is a relatively old and established topic in the literature of IR, researchers have summarized the previous work explicitly \cite{catena2014inverted,lemire2015decoding,silvestri2010vsencoding,trotman2014compression}.
 The variety of compression techniques can be roughly divided into two classes, namely the \textit{integer-oriented encoders} and the \textit{list-oriented encoders}.
@@ -234,7 +235,7 @@ List-oriented encoders are designed to exploit the cluster of neighboring intege
 Basically, their compression ratios are inferior to these of the first category as a batch of integers are encoded indiscriminately, and useless zeros are filled in the codeword to keep word-aligned.
 However, when decoded, list-oriented encoders can obtain an entire block while the formers just decode one integer at a time.
 More importantly, with the help of \textit{skip pointers} or \textit{skip list}, it is possible to step along the codewords compressed by list-oriented encoders and stop when the required number of blocks has been bypassed.
-Some of these encoders are \textit{Simple Family} \cite{anh2004index,anh2005inverted,anh2006improved,anh2010index}, AFOR \cite{delbru2012searching} and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR) \cite{lemire2015decoding,yan2009inverted,zukowski2006super}.
+Example of these encoders are Simple-X \cite{anh2004index,anh2005inverted,anh2006improved,anh2010index}, AFOR \cite{delbru2012searching} and \textit{Patched} FOR (PFOR, OptPFOR and FastPFOR) \cite{lemire2015decoding,yan2009inverted,zukowski2006super}.
 
 In our scenario, we follow the settings used in \cite{ottaviano2015optimal}, that encoders in $ \cal E $ are chosen from list-oriented encoders and posting lists are uniformly split into fixed-sized blocks of 128 postings.
 And those posting lists are virtually concatenated into one large list to facilitate our computation under bounded space/time budget, as we only store some statistics about each block, this will not take too much space.
@@ -243,17 +244,17 @@ And those posting lists are virtually concatenated into one large list to facili
 Recently, researchers begin to use breakthroughs in succinct data structures to bear on the problems in inverted index compression.
 Giuseppe et al. \cite{ottaviano2014partitioned} use pruned DAG \cite{ferragina2011optimally} to optimally partition posting list for minimal compression and convenient access.
 Petri et al. \cite{petri2014score} describe an data structure combining pruned suffix tree and inverted index together to facilitate phrase-based ranking.
-Our work is similar to these efforts, applying bicriteria compression to inverted index.
+Our work is similar to these efforts, namely applying bicriteria compression to inverted index.
 
 In our context, we are interested in optimally trading space occupancy with query processing time under specified space/time budget.
 With respect to the notion of ``optimal", we introduce the concept of \textit{Pareto-Optimal Compression} to define it in a principled way: encoders achieve different points in the space-time trade-off curve, if to set the space occupancy and query processing time as two dimensions of the coordinate system.
-Optimal ones are those extreme points whose performances are not worse than others in one dimension, and if to be optimized in any dimension, performances in the other two will get impaired accordingly.
+Optimal ones are those extreme points whose performances are not worse than others in one dimension, and if to be optimized in any dimension, performances in another dimension will get impaired accordingly.
 Obviously there exists a set of Pareto-Optimal Compressions with different considerations.
 As an extreme example, consider the two solutions: one is space-optimal compressed by Binary Interpolative Coding \cite{moffat2000binary} and the other one is time-optimal compressed by SIMD encoders.
-That is, for any block of the posting list, we always choose to use either the space-efficient encoder or the time-efficient one.
-However, in between these two extremes, we still have a plethora of encoders like PFOR and Simple-X.
+That is, for any block of the posting list, we can always choose to use either the space-efficient encoder or the time-efficient one.
+However, in between these two extremes, there still exists a plethora of encoders like PFOR and Simple-X.
 Our goal is to move from one extreme to other by trading decompression speed for space occupancy, or vice versa.
-Since there are $ k $ encoders for $ n $blocks, the key is to automatically and efficiently choose any of them for optimal tradeoffs.
+Since there are $ k $ encoders for $ n $ blocks, the key is to automatically and efficiently choose any of them for optimal tradeoffs.
 
 \subsection{Directed Acyclic Graph}
 By modeling index compression as an Directed Acyclic Graph $ \cal G $, finding the optimal solution can be reduced to the \textit{Single Source Shortest Path} problem over it.
@@ -267,7 +268,7 @@ The problem of fully partitioning $ L $ is converted to finding a path $\pi \in 
 It has been commonly used in many list-oriented encoders \cite{song2016optimizing}.
 These encoders usually partition a posting list into chunks of different lengths aligning to its local clusters.
 Earlier ones like Fixed Binary \cite{anh2004index} and AFOR use a simple greedy search without backtracking.
-Silvestri and Venturini introduce dynamic programming recurrence for VSEncoding \cite{silvestri2010vsencoding} while Guiseppe et al. resort to a more efficient approximation algorithm.
+Silvestri and Venturini introduce dynamic programming recurrence for VSEncoding \cite{silvestri2010vsencoding} while Guiseppe et al. resort to a more efficient approximation algorithm \cite{ottaviano2014partitioned}.
 \begin{figure}
 	\centering
 	\subfloat[DAG for SSSP problem, edges have different lengths and are attatched with one space cost.]{
@@ -493,6 +494,7 @@ Table~\ref{tab: collection statistics} compares these two collections using some
 	\centering
 	\caption{Collection statistics for GOV2 and Common Crawl}
 	\renewcommand{\arraystretch}{1.0}
+	\setlength\tabcolsep{3pt}
 	\begin{tabular}{l*{2}{r}}
 		\toprule
 		& \multicolumn{1}{c}{GOV2} & \multicolumn{1}{c}{Common Crawl} \\
@@ -564,10 +566,10 @@ However, we can use it to find the proper point where the average decoding time 
 
 Table~\ref{tab: space and time} reports the indexing performances of \textit{bicriteria} under various budgets in comparison with \textit{hybrid}.
 Results are classified by ``method@[\textit{compression level}][\textit{budget type}]", space denotes the index size in gigabytes and time denotes the expected time cost in nanoseconds of decoding one 128-sized block.
-The expected time cost is obtained using $ \sum_{i=1}^{n}$ $x_{i,j}\hat{t}_{i,j} / \sum_{i=1}^{n}f_{i} $, taking into account of the impact of frequently accessed blocks.
+The expected time cost is obtained using $ \sum_{i=1}^{n}$ $ x_{i,j}\hat{t}_{i,j} / \sum_{i=1}^{n}f_{i} $, taking into account of the impact of frequently accessed blocks.
 \begin{table*}
 	\centering
-	\caption{Comparison of construction time, and average bits per element of each componentmmmmmmmmmm}
+	\caption{Comparison of index size in gigabytes and expected average decoding time per block in nanoseconds of \textit{bicriteria} and \textit{hybrid} under various budgets on GOV2 and Common Crawl.}
 	\renewcommand{\arraystretch}{1.0}
 	\setlength\tabcolsep{6pt}
 	\begin{tabular}{@{}l*{3}{l*{2}{r}}}
