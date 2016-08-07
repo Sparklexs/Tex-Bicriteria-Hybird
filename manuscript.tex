@@ -158,7 +158,7 @@ We perform an extensive experiment to show that, given bounded time/space budget
 \keywords{Inverted Index; Bicriteria Compression; Lagrangian Relaxation}
 
 \section{Introduction}\label{sec:intro}
-Indexing is essential to efficiently manage growing data and perform quick queries in many information retrieval systems.
+Indexing is essential to efficiently managing growing data and performing quick queries in many information retrieval systems.
 The use of inverted Indexes in web search engine is probably one of the most successful examples in IR.
 Despite of the fact that it is a relatively old yet simple data structure, inverted index is extensible with supplementary information to answer different queries within much less space occupied.
 Compression has been one of the most active field of inverted index research in the last decades, for it not only reduces the space occupancy, but also accelerates data transfer in I/O.
@@ -169,7 +169,7 @@ The inverted index compression we are talking about is usually concentrated in t
 However, there exists a divergence between compressed size and decompression time,
 since pursuing the minimization of size will undoubtedly impair decoding.
 Encoders with different space-time treadoffs keep coming out to settle for requirements of various user scenarios \cite{lemire2015decoding,ottaviano2015optimal,ottaviano2014partitioned,petri2014score,silvestri2010vsencoding}.
-Among these techniques, splitting posting list into \textit{blocks} (or \textit{chunks}) has been demonstrate to be an efficient way and widely adopted by many encoders.
+Among these techniques, splitting posting list into \textit{blocks} (or \textit{chunks}) has been demonstrated to be an efficient way and is widely adopted by many encoders.
 For the reason that by keeping blocks separately accessible we can expect faster decoding speed and hierarchical structure.
 In addition, variable-sized blocks can utilize the clustering property of list to beat the entropy \cite{moffat2000binary,silvestri2010vsencoding}.
 Nonetheless, designers of information systems have to carefully choose one of these encoders to satisfy different IR tasks: whether to achieve optimal compression ratio/decoding speed, sacrificing the other one; or to balance them by adopting one proper encoder with finely tuned space-time tradeoff.
@@ -184,7 +184,7 @@ They also fail to explore complexity of the algorithm as it works on a empirical
 Giuseppe et al. \cite{ottaviano2015optimal} explicitly define the Space-Constrained Expected Time Minimization problem: given a dataset $ D $ and an upper bound $ \cal S $ on its compressed size, the goal is to choose one proper encoder from an encoder set $ \cal E $ for each block of the index.
 Thus minimizing the expected query processing time, provided that it can be compressed within $ \cal S $ space.
 They then propose a linear time solution for this problem, which is quite straight forward.
-Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non increasing order by the time/space gain ratio of each advisable encoder on each block.
+Under two predefined dominance criteria, their algorithm works by enumerating all the advisable compression methods, then sorting them in an non-increasing order by the time/space gain ratio of each advisable encoder on each block.
 After this, a sequential scan and replace is able to find all the optional solutions for any possible budget constraint $ \cal S $.
 Given the fact that each posting list is divided into fixed-sized blocks, whose total number is $ n $, and a set of $ k $ encoders, the algorithm finishes in $ \Theta(nk\log(nk)) $ time and $ O(nk) $ space.
 
@@ -204,9 +204,9 @@ The main contributions are listed below:
 	\item Different from \cite{ottaviano2015optimal} which is a greedy algorithm, our method amortizes the expected budget over each posting list in a more balanced way.
 	Thus we could expect for a better average performance.
 	While keeping the same space and time complexity, our method is more efficient and needs less runtime memory in practice without global sorting.
-	\item We execute a preliminary set of experiments on two realistic dataset, GOV2 and Common Crawl, with AOL query log.
+	\item We execute a detailed experimental evaluation on two realistic dataset, GOV2 and Common Crawl, with AOL query log.
 	Analysis shows that our method is able to obtain flexible tradeoffs under bicriteria compression.
-	Its compressed size and query processing time is very competitive to the hybrid index in \cite{ottaviano2015optimal}, however, with more detailed description and more strict theoretic foundation.
+	Its compressed size and query processing time are very competitive to the hybrid index in \cite{ottaviano2015optimal}, however, with more detailed description and more strict theoretic foundation.
 \end{enumerate}
 
 \section{Preliminaries}\label{sec: preliminaries}
@@ -452,7 +452,7 @@ To generate a 1-\textit{n} path would obviously cost $ O(nk) $ time and space.
 Recall the number of iterations previously mentioned, the dual problem can be solved in $ O(\tilde{n}\log(ns_{costs}t_{costs})) $ time and $ O(\tilde{n}) $ space, where $ \tilde{n} = nk $ is the $ \cal G $'s size.
 
 \subsection{Closing the Gap}
-Upon termination of the iteration we have two paths $ (\pi_l,$ $\pi_r) $ which specify a lower bound and an upper bound of the minimal value $ f(\pi^\star) $.
+Upon termination of the iteration we have two paths $ (\pi_l, $ $ \pi_r) $ which specify a lower bound and an upper bound of the minimal value $ f(\pi^\star) $.
 From Equation~\eqref{equ: maximum}, we know the lower bound is the intersection point, namely $ LB = L(\mu^\star) $; also, any path $ \pi $ with $ g(\pi) \leqslant 0 $ generated during the iteration is a feasible solution for RCSP, and the best value for upper bound is $ f(\pi_r) $ from the last path $ \pi_r $.
 Thus we have the bound $ L(\mu^\star) \leqslant f(\pi^\star) \leqslant f(\pi_r) $, which is also shown in Figure~\ref{fig: intersection}.
 
@@ -527,7 +527,7 @@ Before performing queries, the whole inverted index is completely loaded into ma
 \subsection{Indexing Performance}
 \paragraph*{Construction time}
 We have analyzed our algorithm in detail in the previous section.
-Its complexity is $ O(\tilde{n} $$ \log(n $ $ s_{costs} $$ t_{costs})) $ in time and $ O(\tilde{n}) $ in space, almost equaled by \textit{hybrid} which is $ O(\tilde{n} $$ \log(\tilde{n})) $ in time and $ O(\tilde{n}) $ in space.
+Its complexity is $ O(\tilde{n} \log(n $ $ s_{costs} t_{costs})) $ in time and $ O(\tilde{n}) $ in space, almost equaled by \textit{hybrid} which is $ O(\tilde{n}\log(\tilde{n})) $ in time and $ O(\tilde{n}) $ in space.
 Both \textit{bicriteria} and \textit{hybrid} concatenate all the posting lists into one to arrange encodings of each block, and are delayed by one time-consuming phase that cannot be paralleled, for \textit{bicriteria} is the iteration when solving the dual problem, for \textit{hybrid} is the sorting of $ \lambda_{i,j} $.
 
 However, in practice \textit{bicriteria} compresses more efficiently than \textit{hybrid}.
