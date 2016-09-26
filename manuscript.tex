@@ -224,7 +224,7 @@ There is a vast variety of literature study on structures and query processing s
 %The appropriate compression of docid-sorted index is the focus of our work.
 
 To facilitate both compression and query processing, posting lists from the index are always considered separate data stream, components in each posting lists (docid, frequency and position) are stored in a non-interleaved way, and the lists of docid and position are usually sorted and transformed to the corresponding sequence of differences(or \textit{gaps}) between adjacent values.
-Hence, the task of index compression is best viewed code sequences of integers of the form $ x_{1},x_{2},x_{3},\ldots,x_{m} $ where $ x_{i}\geqslant0 $ for all $ 1\leqslant i\leqslant m $, and $ m $ is the number of the postings.
+Hence, the task of index compression is best viewed code sequences of integers of the form $ x_{1}, x_{2}, x_{3},\ldots, x_{m} $ where $ x_{i}\geqslant0 $ for all $ 1\leqslant i\leqslant m $, and $ m $ is the number of the postings.
 
 Index compression is a relatively old and established topic in the literature of IR, researchers have summarized the previous work explicitly \cite{catena2014inverted,lemire2015decoding,silvestri2010vsencoding,trotman2014compression}.
 The variety of compression techniques can be roughly divided into two classes, namely the \textit{integer-oriented encoders} and the \textit{list-oriented encoders}.
@@ -262,7 +262,7 @@ Since there are $ k $ encoders for $ n $ blocks, the key is to automatically and
 \subsection{Directed Acyclic Graph}
 By modeling index compression as an Directed Acyclic Graph $ \cal G $, finding the optimal solution can be reduced to the \textit{Single Source Shortest Path} problem over it.
 
-$ \cal G $ is built as follows: a posting list can be treated as a list containing only positive integers $ L[0,m] $, where $ m $ is the number of postings.
+$ \cal G $ is built as follows: a posting list can be treated as a list containing only positive integers $ L[0, m] $, where $ m $ is the number of postings.
 Then each integer is represented by a vertex, plus a dummy vertex marking the end of the sequence.
 $ \cal G $ is complete with $ O(m^2) $ edges, each edge is an exact correspondence of a partition in the $ L $.
 The weight of an edge in the $ \cal G $ is equal to the cost in bits consumed by the partition.
@@ -371,7 +371,7 @@ As we are trying to find a minimal $ f(\pi) $, we get the following equation:
 \begin{equation}
 L(\mu) \leqslant f(\pi^\star) \label{equ: maximum}
 \end{equation}
-\noindent For every $ \mu \geqslant 0 $.
+\noindent for every $ \mu \geqslant 0 $.
 Therefore, an best lower bound for the optimal path in RCSP can be found by solving its dual problem defined as 
 \begin{equation}
 L^\star = L(\mu^\star) = \max_{\mu \geqslant 0} L(\mu) =\max_{\mu \geqslant 0} \min_{\pi \in \Pi} \left[ f(\pi) + \mu g(\pi) \right]
