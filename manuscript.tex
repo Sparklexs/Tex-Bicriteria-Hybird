@@ -92,18 +92,18 @@
 %
 \author{
 %AUTOR
-%%% 1st. author
-%\alignauthor Xingshen Song\\
-%\affaddr{College of Computer}\\
-%\affaddr{National University of Defense Technology}\\
-%\affaddr{Changsha, China}\\
-%\email{songxingshen@nudt.edu}
-%% 2nd. author
-%\alignauthor Yuexiang Yang\\
-%\affaddr{College of Computer}\\
-%\affaddr{National University of Defense Technology}\\
-%\affaddr{Changsha, China}\\
-%\email{yyx@nudt.edu}
+%% 1st. author
+\alignauthor Xingshen Song\\
+\affaddr{College of Computer}\\
+\affaddr{National University of Defense Technology,}
+\affaddr{Changsha, China}\\
+\email{songxingshen@nudt.edu}
+% 2nd. author
+\alignauthor Yuexiang Yang\\
+\affaddr{College of Computer}\\
+\affaddr{National University of Defense Technology,}
+\affaddr{Changsha, China}\\
+\email{yyx@nudt.edu}
 %% 3rd. author
 %\alignauthor Kun Jiang\\
 %\affaddr{School of Electronic and Information Engineering}\\
@@ -471,6 +471,14 @@ These intermediate paths are naturally bounded by $ \pi_l $ and $ \pi_r $, and t
 The block-wise operation also guarantees paths generated using two adjacent pivots differ from each other by at most $ t_{max} $ and $ s_{max} $.
 A left-to-right scanning is sufficient to change the Lagrangian cost from $ L(\mu^\star) $ to $ f(\pi_r) $ in a appropriate granularity, and find an optimal solution for $ f(\pi^\star) $ with an additive approximation.
 During the procedure, we only need an accumulator to store the current pivot and time/space cost, thus the path-swap algorithm can be done in $ O(n) $ time and $ O(1) $ space.
+
+\section{title}\label{sec: variable_size}
+%Intuitively, fixed-sized blocks are not optimal for partitioning.
+%To take things one step further,
+There is a common view that splitting posting list into fixed-sized blocks is trend to be suboptimal, since integers are not expected to be  uniformly distributed along the list, a mandatory split makes the compressed size vulnerable to outliers inside the block.
+Using variable-sized blocks can effectively improve the situation for it not only reduces the space occupancy, but also the number of blocks in the whole index, thus, we can expect a more efficient skipping when processing user queries.
+However, arbitrarily dividing a posting list can be prohibitive due to the following reasons.
+First, the edge complexities of DAG grow larger by introducing variable-sized blocks, 
 
 \section{Experiments}\label{sec: experiments}
 In order to provide an experimental evaluation of the proposed compression technique, we have implemented our algorithm, which we call \textit{bicriteria}, in C++.
